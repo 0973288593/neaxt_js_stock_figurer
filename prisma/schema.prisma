@@ -1,0 +1,53 @@
+// // prisma/schema.prisma
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+// datasource db {
+//   provider = "mysql"
+//   url      = env("DATABASE_URL")
+// }
+
+// model Product {
+//   id          Int      @id @default(autoincrement())
+//   sku         String
+//   name        String
+//   imag        String
+//   price       Int
+//   price_cost  Int
+//   description String?
+//   created_at  DateTime @default(now())
+// }
+
+// model ProductImage {
+//   id         Int    @id @default(autoincrement())
+//   img_name   String
+//   product_id Int
+// }
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  sku         String
+  imag        String
+  price       Int
+  price_cost  Int
+  description String?
+  created_at  DateTime @default(now())
+  images    ProductImage[] // 👈 relation ย้อนกลับ (optional)
+}
+
+model ProductImage {
+  id         String   @id @default(uuid())
+  img_name   String
+  product_id String
+  product    Product  @relation(fields: [product_id], references: [id])
+}

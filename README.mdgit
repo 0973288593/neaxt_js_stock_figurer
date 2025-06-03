@@ -1,0 +1,1 @@
+"# stock_model_next"  initgit add README.mdgit commit -m "first commit"git branch -M maingit remote add origin https://github.com/0973288593/stock_model_next.gitgit push -u origin main
