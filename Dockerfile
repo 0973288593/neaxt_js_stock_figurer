@@ -18,19 +18,23 @@
 
 
 
+# ใช้ Node.js base image แบบเบา
 FROM node:18-alpine
 
-
-
+# ตั้ง working directory
 WORKDIR /app
 
-COPY package*json ./
+# คัดลอกเฉพาะไฟล์ package เพื่อ install dependencies ก่อน (เพื่อใช้ cache ได้ดี)
+COPY package*.json ./
 
+# ติดตั้ง dependencies
 RUN npm install
 
+# คัดลอกโค้ดทั้งหมด (ทีหลัง เพื่อให้ขั้นตอนก่อนหน้านี้ cache ได้ถ้าไม่มีการเปลี่ยนโค้ด)
 COPY . .
 
-
+# เปิดพอร์ตที่แอปใช้งาน
 EXPOSE 3000
 
-CMD npm run dev
+# รันคำสั่งเมื่อ container start
+CMD ["npm", "run", "dev"]

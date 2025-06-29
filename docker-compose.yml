@@ -1,6 +1,6 @@
 version: '3.7' # กำหนด docker version
 services:
-  node-server: # ตั้งชื่อ container (เหมือน --name)
+  web-app: # ตั้งชื่อ container (เหมือน --name)
     container_name: nextjs
     build: . # ตำแหน่ง dockerfile
     ports:
