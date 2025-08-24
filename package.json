@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "npx prisma db seed & next dev",
+    "dev": "npx prisma db push  & npx prisma db seed & next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
