@@ -1,25 +1,44 @@
-'use client';
+'use client'
 
 import React, { useState } from "react";
 import { useRouter } from 'next/navigation'
 
 
 export default function LoginPage() {
+    const [password, setPassword] = useState<string>("")
+    const [username , setUsername] = useState<string>("")
     const router = useRouter()
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('')
-    const [error , setError] = useState('')
-    const [email , setEmail] = useState('')
+    // const handleLogin = async (e:React.FormEvent) =>{
+    //     e.preventDefault();
+    //     if (username === 'admin' && password === '1234') {
+    //       document.cookie = `token=123456`
+    //       router.push('/dashboard')
+    //     } 
+    // }
+     const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault(); // ✅ กันไม่ให้ form reload หน้า
 
-    const handleLogin = async (e:React.FormEvent) =>{
-        e.preventDefault();
+    if (username === "admin" && password === "1234") {
+      // ❌ document.cookie ใช้ไม่ได้กับ cookies() ฝั่ง server
+      // ✅ เรียก API ให้ server เซ็ต cookie แทน
+      const res = await fetch("/login/api/api-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
 
-        if (username === 'admin' && password === '1234') {
-            router.push('/dashboard')
-        } else {
-            setError('ชื่อผู้ให้หรือรหัสผ่านไม่ถูกต้อง')
-        }
+      if (res.ok) {
+        router.push("/dashboard");
+        router.refresh();
+      } else {
+        alert("Invalid credentials");
+      }
+    } else {
+      alert("Invalid credentials");
     }
+  };
+
+
 
     return (
          <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -28,14 +47,13 @@ export default function LoginPage() {
         className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md space-y-4"
       >
         <h2 className="text-2xl font-bold text-center">Login</h2>
-
         <div>
           <label className="block text-sm font-medium mb-1">Email</label>
           <input
-            type="email"
+            type="text"
             className="w-full px-4 py-2 border rounded-lg"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={username}
+             onChange={(e) => setUsername(e.target.value)} 
             required
           />
         </div>
