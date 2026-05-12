@@ -1,4 +1,10 @@
+"use client";
 import React from "react";
+
+//import  ProductTable from"../ui/table/product_table"
+
+import TablePage from "../../components/table/product_table"
+
 
 const Products = () => {
   return (
@@ -29,17 +35,14 @@ const Products = () => {
             className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
           >
             create Product
+
           </button>
         </a>
       </div>
-      {/* <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-6 bg-blue-500 p-4 text-white">
-          ครึ่งหนึ่งของแถว
-        </div>
-        <div className="col-span-6 bg-green-500 p-4 text-white">
-          ครึ่งหนึ่งของแถว
-        </div>
-      </div> */}
+      <div>
+        <TablePage />
+      </div>
+
     </div>
   );
 };

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import FileUpload from "../../ui/Dropzone"
+import { redirect } from "next/dist/server/api-utils";
+
 
 export default function createProduct() {
   const [formData, setFormData] = useState({
@@ -34,7 +36,9 @@ export default function createProduct() {
       ...prevState,
       [name]: value,
     }));
+    
   };
+
   //  const handleDrop = (acceptedFiles: File[]) => {
   //    setFormData({ ...formData, product_img: acceptedFiles });
   //  };
@@ -58,6 +62,7 @@ export default function createProduct() {
       if (response.ok) {
         console.log(result);
         setMessage("บันทึกข้อมูลสำเร็จ!");
+        window.location.href = "/products";
         // setFormData({ name: "", email: "" });
       } else {
         setMessage(result.error || "เกิดข้อผิดพลาด");

@@ -12,17 +12,21 @@ export type ProductData = {
 export class ProductModel {
   // ✅ CREATE (Insert)
   async insert(data: ProductData) {
-    return await prisma.product.create({
-      data: {
-        sku: data.sku,
-        name: data.name,
-        description: data.description || '',
-        price: data.price,
-        price_cost: data.price_cost,
-        imag: data.imag || '',
-      },
-    });
-  }
+  return prisma.product.create({
+    data: {
+      sku: String(data.sku),
+      name: String(data.name),
+      description: data.description ?? '',
+      price: Number(data.price),
+      price_cost: Number(data.price_cost),
+      image: data.imag ?? '',
+    },
+  });
+
+
+
+}
+
 
   // ✅ UPDATE
   async update(id: string, data: Partial<ProductData>) {
@@ -33,16 +37,43 @@ export class ProductModel {
   }
 
   // ✅ DELETE
-  async delete(id: string) {
-    return await prisma.product.delete({
-      where: { id },
-    });
-  }
+async delete(id: string) {
+
+  await prisma.productImage.deleteMany({
+    where: {
+      product_id: id
+    }
+  })
+
+  return await prisma.product.delete({
+    where: {
+      id: id
+    }
+  })
+
+}
 
   // ✅ GET ALL
-  async getAll() {
-    return await prisma.product.findMany();
+  async getAll(page, limit) {
+
+    return await prisma.product.findMany({
+      skip: page,
+      take: limit,
+      orderBy: {
+      created_at: 'desc',
+    },
+    });
   }
+  async getCountAll() {
+
+    const count = await prisma.product.count();
+   // console.log("COUNT:", count, typeof count);
+    //return await prisma.product.count();
+    
+    return count;
+  }
+
+
 
   // ✅ GET BY ID
   async getById(id: string) {

@@ -2,6 +2,8 @@
 import Sidebar from "@/components/sidebar"
 import "../app/globals.css"
 import { cookies } from "next/headers";
+import { redirect } from 'next/navigation';
+
 export default async  function  DashboardLayout({
   children, // will be a page or nested layout
 }: {
@@ -9,6 +11,11 @@ export default async  function  DashboardLayout({
 }) {
   const cookiesStore = await cookies() // ✅ ต้อง await
   const token = cookiesStore.get("token")?.value
+
+  // if(!token){
+  //     redirect('/login');
+  // }
+  
   return (
     <html lang="en">
       <head>
