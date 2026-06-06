@@ -38,6 +38,9 @@ body {
   margin-right: 1rem; */
   font-size: 1rem;
 }
+.dropzone .dz-preview.dz-image-preview {
+  background: transparent !important;
+}
 
 
 

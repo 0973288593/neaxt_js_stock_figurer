@@ -74,6 +74,25 @@ export default function createProduct() {
     setLoading(false);
   };
 
+  const generateSKU = () => {
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const randomSKU = Array.from(
+      { length: 3 },
+      () => letters[Math.floor(Math.random() * letters.length)]
+    ).join("");
+    const randomPart = Math.random()
+      .toString(36)
+      .substring(2, 8)
+      .toUpperCase();
+
+    const sku = `${randomSKU}-${randomPart}`;
+
+    setFormData((prev) => ({
+      ...prev,
+      product_sku: sku,
+    }));
+  };
+
   return (
     <div className="mt-10 p-6 bg-white shadow-md rounded-lg">
       <div className="my-1">
@@ -159,8 +178,19 @@ export default function createProduct() {
                   htmlFor="product_sku"
                   className="block mb-2 text-sm font-medium  text-black"
                 >
-                  Product sku
+                  <span className="me-3">
+                    Product sku
+                  </span>
+                  
+                  <button
+                    type="button"
+                    onClick={generateSKU}
+                    className="px-4 py-2 bg-green-500 text-white rounded"
+                  >
+                    Random
+                </button>
                 </label>
+            
                 <input
                   type="text"
                   id="product_sku"

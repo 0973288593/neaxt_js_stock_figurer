@@ -8,6 +8,9 @@
 .yarn/install-state.gz
 .data
 
+
+# public/uploads/product
+
 # testing
 /coverage
 
