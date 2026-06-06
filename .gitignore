@@ -9,7 +9,7 @@
 .data
 
 
-# public/uploads/product
+public/uploads/product
 
 # testing
 /coverage
