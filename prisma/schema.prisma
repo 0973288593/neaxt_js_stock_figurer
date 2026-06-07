@@ -2,10 +2,9 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
 datasource db {
   provider = "mysql"
-
+  url      = env("DATABASE_URL")
 }
 
 model Product {
@@ -18,6 +17,7 @@ model Product {
   description String?
   created_at  DateTime       @default(now())
   images      ProductImage[]
+  depositItems DepositItem[]
 }
 
 model ProductImage {
@@ -31,7 +31,36 @@ model ProductImage {
     onDelete: Cascade
   )
 }
+model Deposit {
+  id            String          @id @default(uuid())
+  deposit_no    String          @unique
+  customer_name String
+  total_amount  Float
+  status        String          @default("OPEN")
+  created_at    DateTime        @default(now())
 
+  items         DepositItem[]
+}
+
+model DepositItem {
+  id          String   @id @default(uuid())
+  deposit_id  String
+  product_id  String
+  qty         Int
+  price       Float
+  amount      Float
+
+  deposit Deposit @relation(
+    fields: [deposit_id],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  product Product @relation(
+    fields: [product_id],
+    references: [id]
+  )
+}
 model Person {
   PersonID   Int      @id @default(autoincrement())
   LastName   String

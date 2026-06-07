@@ -7,6 +7,7 @@ import {
   CircleUserRound,
   Settings,
   WalletCards,
+  HandCoins
 } from "lucide-react";
 
 import { SidebarItems } from "@/types";
@@ -44,6 +45,11 @@ const items: ISidebarItem[] = [
     name: "Accounts",
     path: "/accounts",
     icon: CircleUserRound,
+  },
+  {
+    name: "Deposit",
+    path: "/deposit",
+    icon: HandCoins,
   },
   {
     name: "Settings",
@@ -86,7 +92,6 @@ const Sidebar = () => {
           ))}
         </div>
       </div>
-      Sidebar
     </div>
   );
 };
