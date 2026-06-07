@@ -14,6 +14,7 @@ export default async  function  DashboardLayout({
 }) {
   const cookiesStore = await cookies() // ✅ ต้อง await
   const token = cookiesStore.get("token")?.value
+  // console.log(token)
 
   // if(!token){
   //     redirect('/login');

@@ -4,39 +4,73 @@ import { useEffect, useRef } from "react";
 import Dropzone from "dropzone";
 import "dropzone/dist/dropzone.css";
 
-const DropzoneComponent = ({ onFileUpload }) => {
+const DropzoneComponent = ({
+  onFileUpload,
+  existingImages = [],
+}) => {
   const dropzoneRef = useRef(null);
+  const dzRef = useRef(null);
 
   useEffect(() => {
-    if (!onFileUpload) {
-      console.error("onFileUpload is not provided to DropzoneComponent");
-      return;
-    }
+    if (!onFileUpload) return;
+
+    if (dzRef.current) return; // ป้องกันสร้างซ้ำ
 
     Dropzone.autoDiscover = false;
 
-    const myDropzone = new Dropzone(dropzoneRef.current, {
+    dzRef.current = new Dropzone(dropzoneRef.current, {
       url: "/api/uploadProduct",
       addRemoveLinks: true,
-      dictDefaultMessage: "ลากและวางไฟล์ที่นี่ หรือคลิกเพื่ออัปโหลด",
-       params: function (files, xhr, chunk) {
+      dictDefaultMessage:
+        "ลากและวางไฟล์ที่นี่ หรือคลิกเพื่ออัปโหลด",
+      params: function (files, xhr, chunk) {
         return {
-          name: `file_${Date.now()}`, // ใช้ timestamp เป็นค่า name
-          dzuuid: chunk ? chunk.file.upload.uuid : undefined, // ถ้ามีการอัปโหลดแบบ chunk, ให้แนบ UUID
+          name: `file_${Date.now()}`,
+          dzuuid: chunk
+            ? chunk.file.upload.uuid
+            : undefined,
         };
       },
     });
 
-    myDropzone.on("success", function (file, response) {
+    dzRef.current.on("success", (file, response) => {
       if (response.name) {
-        onFileUpload((prevFiles) => [...prevFiles, response.name]); // ส่งข้อมูลกลับไปที่ FormPage
+        onFileUpload((prev) => [
+          ...prev,
+          response.name,
+        ]);
       }
     });
 
     return () => {
-      myDropzone.destroy();
+      dzRef.current?.destroy();
+      dzRef.current = null;
     };
   }, [onFileUpload]);
+
+
+  useEffect(() => {
+    if (!dzRef.current) return;
+    if (!Array.isArray(existingImages)) return;
+    if (!existingImages.length) return;
+
+  existingImages.forEach((image) => {
+    const mockFile = {
+      name: image,
+      size: 12345,
+      accepted: true,
+    };
+
+    const imageUrl = `/uploads/product/${image}`;
+
+   dzRef.current.displayExistingFile(
+  mockFile,
+  imageUrl
+);
+
+    dzRef.current.files.push(mockFile);
+  });
+}, [existingImages]);
 
   return (
     <div className="p-4">
