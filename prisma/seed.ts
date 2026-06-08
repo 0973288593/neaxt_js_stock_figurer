@@ -11,7 +11,7 @@ async function main() {
         Address: "123 Main St",
         City: "Bangkok",
         Email: "admin@admin.com",
-        Password: "admin" // 🚨 ควร hash จริงๆ นะครับ
+        Password: "admin"
       },
     ],
     skipDuplicates: true, // กัน insert ซ้ำ

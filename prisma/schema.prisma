@@ -1,10 +1,11 @@
+
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
 }
 
 model Product {
@@ -21,15 +22,11 @@ model Product {
 }
 
 model ProductImage {
-  id         String  @id @default(uuid())
+  id         String @id @default(uuid())
   img_name   String
   product_id String
 
-  product Product @relation(
-    fields: [product_id],
-    references: [id],
-    onDelete: Cascade
-  )
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
 }
 model Deposit {
   id            String          @id @default(uuid())
@@ -43,23 +40,15 @@ model Deposit {
 }
 
 model DepositItem {
-  id          String   @id @default(uuid())
-  deposit_id  String
-  product_id  String
-  qty         Int
-  price       Float
-  amount      Float
+  id         String @id @default(uuid())
+  deposit_id String
+  product_id String
+  qty        Int
+  price      Float
+  amount     Float
 
-  deposit Deposit @relation(
-    fields: [deposit_id],
-    references: [id],
-    onDelete: Cascade
-  )
-
-  product Product @relation(
-    fields: [product_id],
-    references: [id]
-  )
+  deposit Deposit @relation(fields: [deposit_id], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [product_id], references: [id])
 }
 model Person {
   PersonID   Int      @id @default(autoincrement())
