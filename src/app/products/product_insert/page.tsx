@@ -22,6 +22,8 @@ export default function createProduct() {
 
   // เมื่อ uploadedFiles เปลี่ยน, ดึงรูปแรกมาใส่ใน formData.product_img
   useEffect(() => {
+
+    
     if (uploadedFiles.length > 0) {
       setFormData((prevFormData) => ({
         ...prevFormData,

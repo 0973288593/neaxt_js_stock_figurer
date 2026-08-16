@@ -56,7 +56,7 @@ const SidebarItem = ({ item }: { item: ISidebarItem }) => {
         {items && items.length > 0 && <ChevronDown size={18} />}
       </div>
       {expanded && items && items.length > 0 && (
-        <div className="flex flex-col space-y-1 ml-10">
+        <div className="flex flex-col space-y-1 ml-10 ">
           {items.map((item) => (
             <SubMenuItem key={item.path} item={item} />
           ))}

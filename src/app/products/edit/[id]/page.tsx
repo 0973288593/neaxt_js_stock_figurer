@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import FileUpload from "@/app/ui/Dropzone";
+import { useCallback } from "react";
 // src\app\globals.css
 
 
@@ -18,6 +19,8 @@ export default function EditProduct() {
   const [loading, setLoading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
 
+
+
   const [formData, setFormData] = useState({
     product_name: "",
     description: "",
@@ -29,44 +32,72 @@ export default function EditProduct() {
     images: [],
   });
 
-    // โหลดข้อมูลเดิม
-    useEffect(() => {
-        loadProduct();
-    }, []);
+  // โหลดข้อมูลเดิม
+  useEffect(() => {
+
+    // const loadProduct = async () => {
+
+    //   const res = await fetch(`/api/product/${id}`);
+
+    //   const data = await res.json();
+
+    //   const product = data.data;
+
+    //   setFormData({
+    //     product_name: product.name || "",
+    //     description: product.description || "",
+    //     product_cost: product.price_cost || 0,
+    //     product_sku: product.sku || "",
+    //     product_price: product.price || 0,
+    //     Stock: product.Stock || 0,
+    //     product_img: product.image || "",
+    //     images: product.images?.[0]?.img_name?.replace(/^"|"$/g, "")?.split(",") || [],
+    //   });
+    //   console.log(formData.images);
+
+    // };
+
+
+
+    loadProduct();
+
+
+  }, [id]);
+
 
   const loadProduct = async () => {
-    const res = await fetch(`/api/product/${id}`);
+    try {
+      const res = await fetch(`/api/product/${id}`);
+      const data = await res.json();
 
-    const data = await res.json();
+      const product = data.data;
 
-    const product = data.data;
-
-
-    console.log(product.images[0].img_name.replace(/^"|"$/g, '').split(','))
-
-
-    
-
-    setFormData({
-      product_name: product.name || "",
-      description: product.description || "",
-      product_cost: product.price_cost || 0,
-      product_sku: product.sku || "",
-      product_price: product.price || 0,
-      Stock: product.Stock || 0,
-      product_img: product.image || "",
-        images: product.images?.[0]?.img_name
-    ?.replace(/^"|"$/g, "")
-    ?.split(",") || [],
-    });
-    
+      const oldImages =
+        product.images?.[0]?.img_name
+          ?.replace(/^"|"$/g, "")
+          ?.split(",")
+          .filter(Boolean) || [];
 
 
-    console.log(formData.images);
+      setFormData({
+        product_name: product.name || "",
+        description: product.description || "",
+        product_cost: product.price_cost || 0,
+        product_sku: product.sku || "",
+        product_price: product.price || 0,
+        Stock: product.Stock || 0,
+        product_img: product.image || "",
+        images: oldImages
+        //images: product.images?.[0]?.img_name?.replace(/^"|"$/g, "")?.split(",") || [],
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
-
-    };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -77,19 +108,95 @@ export default function EditProduct() {
       ...prev,
       [name]: value,
     }));
+
+    console.log(formData.images);
   };
+
+  const handleFileUpload = (
+    updater: string | string[] | ((prev: string[]) => string[])
+  ) => {
+    console.log("========== handleFileUpload ==========");
+    console.log("updater:", updater);
+    console.log("isFunction:", typeof updater === "function");
+    console.log("isArray:", Array.isArray(updater));
+
+    setFormData((prev) => {
+      console.log("BEFORE images:", prev.images);
+
+      if (typeof updater === "function") {
+        const nextImages = updater(prev.images);
+
+        console.log("FUNCTION nextImages:", nextImages);
+
+        return {
+          ...prev,
+          images: nextImages,
+        };
+      }
+
+      const newImages = Array.isArray(updater) ? updater : [updater];
+
+      console.log("newImages:", newImages);
+
+      const nextImages = [
+        ...prev.images,
+        ...newImages,
+      ];
+
+      console.log("AFTER images:", nextImages);
+
+      return {
+        ...prev,
+        images: nextImages,
+      };
+    });
+  };
+  // const handleFileUpload = useCallback(
+  //   (
+  //     updater:
+  //       | string
+  //       | string[]
+  //       | ((prev: string[]) => string[])
+  //   ) => {
+  //     setFormData((prev) => {
+  //       if (typeof updater === "function") {
+  //         return {
+  //           ...prev,
+  //           images: updater(prev.images),
+  //         };
+  //       }
+
+  //       const newImages = Array.isArray(updater)
+  //         ? updater
+  //         : [updater];
+
+  //       return {
+  //         ...prev,
+  //         images: [
+  //           ...prev.images,
+  //           ...newImages,
+  //         ],
+  //       };
+  //     });
+  //   },
+  //   []
+  // );
+
 
   // update
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    setLoading(true);
+    // console.log(formData)
+    // return false
+
+    //setLoading(true);
 
     try {
       const response = await fetch(
         `/api/product/${id}`,
         {
-          method: "PUT",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
@@ -106,39 +213,46 @@ export default function EditProduct() {
       console.log(error);
     }
 
-    setLoading(false);
+    //setLoading(false);
   };
+  //setFormData({...});
 
-   
 
   return (
     <div className="p-6">
-        <div className="my-1">
+      <div className="my-1">
         <a href="/products" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
           Black
         </a>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4" >
 
-       <div className="w-full">
+        <div className="w-full">
           <div className="p-4">
             <h1 className="text-black">Edit Product</h1>
           </div>
           <div>
+            {formData.images}
             <div className="h-auto mb-5">
-            {/* <FileUpload onFileUpload={setImages} /> */}
-            <FileUpload
-                  existingImages={formData.images}
-                  onFileUpload={(updater) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      images:
-                        typeof updater === "function"
-                          ? updater(prev.images)
-                          : updater,
-                    }))
-                  }
-                />
+              {/* <FileUpload onFileUpload={setImages} /> */}
+              {/* <FileUpload
+                existingImages={formData.images}
+                onFileUpload={(updater) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    images:
+                      typeof updater === "function"
+                        ? updater(prev.images)
+                        : updater,
+                  }))
+                }
+              /> */}
+
+              <FileUpload
+                existingImages={formData.images}
+                onFileUpload={handleFileUpload}
+              />
+
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -255,13 +369,13 @@ export default function EditProduct() {
               </div>
             </div>
             <div className="px-4">
-                <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    {loading ? "Loading..." : "Update"}
-                </button>
+              <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                {loading ? "Loading..." : "Update"}
+              </button>
             </div>
           </div>
         </div>
-      
+
       </form>
     </div>
   );

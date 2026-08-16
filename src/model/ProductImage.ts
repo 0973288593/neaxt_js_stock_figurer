@@ -14,4 +14,14 @@ export class ProductImageModel {
       },
     });
   }
+
+  async update(id: string, data: Partial<ProductData>) {
+    return await prisma.productImage.updateMany({
+  where: {
+    product_id: id,
+  },
+  data,
+});
+  }
 }
+

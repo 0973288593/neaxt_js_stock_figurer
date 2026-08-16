@@ -1,28 +1,62 @@
+
 "use client";
 
 import { useEffect, useRef } from "react";
 import Dropzone from "dropzone";
 import "dropzone/dist/dropzone.css";
 
+type DropzoneFile = File & {
+  serverFileName?: string;
+  isExisting?: boolean;
+};
+
+type DropzoneProps = {
+  onFileUpload: (
+    updater:
+      | string
+      | string[]
+      | ((prev: string[]) => string[])
+  ) => void;
+  existingImages?: string[];
+};
+
 const DropzoneComponent = ({
   onFileUpload,
   existingImages = [],
-}) => {
-  const dropzoneRef = useRef(null);
-  const dzRef = useRef(null);
+}: DropzoneProps) => {
+  const dropzoneRef = useRef<HTMLDivElement | null>(null);
+  const dzRef = useRef<Dropzone | null>(null);
 
+  // ป้องกัน removedfile ทำงานตอน destroy
+  const isDestroyingRef = useRef(false);
+
+  // เก็บรูปที่แสดงใน Dropzone แล้ว
+  const displayedImagesRef = useRef<Set<string>>(new Set());
+
+  /**
+   * สร้าง Dropzone
+   */
   useEffect(() => {
     if (!onFileUpload) return;
-
-    if (dzRef.current) return; // ป้องกันสร้างซ้ำ
+    if (!dropzoneRef.current) return;
+    if (dzRef.current) return;
 
     Dropzone.autoDiscover = false;
 
-    dzRef.current = new Dropzone(dropzoneRef.current, {
+    console.log("Dropzone INIT");
+
+    const dz = new Dropzone(dropzoneRef.current, {
       url: "/api/uploadProduct",
+
+      paramName: "file",
+
       addRemoveLinks: true,
+
+      acceptedFiles: "image/*",
+
       dictDefaultMessage:
         "ลากและวางไฟล์ที่นี่ หรือคลิกเพื่ออัปโหลด",
+
       params: function (files, xhr, chunk) {
         return {
           name: `file_${Date.now()}`,
@@ -33,188 +67,153 @@ const DropzoneComponent = ({
       },
     });
 
-    dzRef.current.on("success", (file, response) => {
-      if (response.name) {
-        onFileUpload((prev) => [
+    dzRef.current = dz;
+
+    /**
+     * ================================
+     * Upload สำเร็จ
+     * ================================
+     */
+    dz.on("success", (file, response) => {
+      console.log("UPLOAD SUCCESS");
+      console.log("response:", response);
+
+      if (!response?.name) {
+        console.warn("ไม่มี response.name");
+        return;
+      }
+
+      const dropzoneFile = file as DropzoneFile;
+
+      dropzoneFile.serverFileName = response.name;
+      dropzoneFile.isExisting = false;
+
+      onFileUpload((prev) => {
+        console.log("ADD BEFORE:", prev);
+        console.log("ADD FILE:", response.name);
+
+        // ป้องกันไฟล์ซ้ำ
+        if (prev.includes(response.name)) {
+          console.log("ไฟล์มีอยู่แล้ว");
+
+          return prev;
+        }
+
+        const next = [
           ...prev,
           response.name,
-        ]);
-      }
+        ];
+
+        console.log("ADD AFTER:", next);
+
+        return next;
+      });
     });
 
+    /**
+     * ================================
+     * ลบไฟล์ด้วยปุ่ม Remove
+     * ================================
+     */
+    // dzRef.current.on("removedfile", (file) => {
+    //   onFileUpload((prev) =>
+    //     prev.filter((name) => name !== file.name)
+    //   );
+    // });
+    dz.on("removedfile", (file) => {
+      if (isDestroyingRef.current) {
+        console.log(
+          "IGNORE removedfile because Dropzone is destroying"
+        );
+        return;
+      }
+
+      const dropzoneFile = file as DropzoneFile;
+
+      const filename =
+        dropzoneFile.serverFileName ||
+        dropzoneFile.name;
+
+      console.log("USER REMOVE:", filename);
+
+      onFileUpload((prev) => {
+        console.log("BEFORE REMOVE:", prev);
+
+        const next = prev.filter(
+          (img) => img !== filename
+        );
+
+        console.log("AFTER REMOVE:", next);
+
+        return next;
+      });
+
+    });
+
+    /**
+     * ================================
+     * Cleanup
+     * ================================
+     */
     return () => {
-      dzRef.current?.destroy();
+      console.log("Dropzone DESTROY");
+
+      // สำคัญ: ตั้ง flag ก่อน destroy
+      isDestroyingRef.current = true;
+
+      dz.destroy();
+
       dzRef.current = null;
     };
   }, [onFileUpload]);
 
-
+  /**
+   * ================================
+   * แสดงรูปเดิม
+   * ================================
+   */
+  const existingImagesLoadedRef = useRef(false);
   useEffect(() => {
     if (!dzRef.current) return;
     if (!Array.isArray(existingImages)) return;
     if (!existingImages.length) return;
+    if (existingImagesLoadedRef.current) return;
 
-  existingImages.forEach((image) => {
-    const mockFile = {
-      name: image,
-      size: 12345,
-      accepted: true,
+    existingImagesLoadedRef.current = true;
+
+    existingImages.forEach((image) => {
+      const mockFile = {
+        name: image,
+        size: 12345,
+        accepted: true,
+        serverFileName: image,
+      };
+
+      dzRef.current.displayExistingFile(
+        mockFile,
+        `/uploads/product/${image}`
+      );
+    });
+  }, [existingImages]);
+
+  /**
+   * ================================
+   * Reset เมื่อ component unmount
+   * ================================
+   */
+  useEffect(() => {
+    return () => {
+      displayedImagesRef.current.clear();
     };
-
-    const imageUrl = `/uploads/product/${image}`;
-
-   dzRef.current.displayExistingFile(
-  mockFile,
-  imageUrl
-);
-
-    dzRef.current.files.push(mockFile);
-  });
-}, [existingImages]);
+  }, []);
 
   return (
-    <div className="p-4">
-      <div
-        ref={dropzoneRef}
-        className="dropzone border-2 border-dashed p-6 rounded-lg"
-      >
-        {/* พื้นที่ Dropzone */}
-      </div>
-    </div>
+    <div
+      ref={dropzoneRef}
+      className="dropzone min-h-[200px] border-2 border-dashed border-gray-300 rounded-lg p-6"
+    />
   );
 };
 
 export default DropzoneComponent;
 
-
-
-// import { useEffect } from "react";
-// import Dropzone from "dropzone";
-// import "dropzone/dist/dropzone.css";
-
-// const uploadedFiles = [];
-
-// const DropzoneComponent = () => { 
-//   useEffect(() => {
-//     Dropzone.autoDiscover = false;
-
-//     const myDropzone = new Dropzone("#img", {
-//       url: "/api/uploadProduct",
-//       addRemoveLinks: true,
-//       dictDefaultMessage: "ลากและวางไฟล์ที่นี่ หรือคลิกเพื่ออัปโหลด",
-//       params: function (files, xhr, chunk) {
-//         return {
-//           name: `file_${Date.now()}`, // ใช้ timestamp เป็นค่า name
-//           dzuuid: chunk ? chunk.file.upload.uuid : undefined, // ถ้ามีการอัปโหลดแบบ chunk, ให้แนบ UUID
-//         };
-//       },
-//     });
-
-//     myDropzone.on("success", function (file, response) {
-//       if (response.name) {
-//         uploadedFiles.push(response.name); // เพิ่มชื่อไฟล์ที่ได้รับจาก response
-//         updateProductImgValue();
-//       }
-//     });
-//     myDropzone.on("addedfile", (file) => {
-//       //document.getElementById("product_img").value = file.name;
-//       //console.log(`File added with new name: ${file.name}`);
-//     });
-
-//     myDropzone.on("removedfile", (file) => {
-//       //console.log(`File removed: ${file.name}`);
-//       // คุณสามารถเพิ่มโค้ดสำหรับเรียก API เพื่อลบไฟล์จากเซิร์ฟเวอร์ที่นี่
-//     });
-    
-
-//     return () => {
-//       myDropzone.destroy();
-//     };
-//   }, []);
-//   // ฟังก์ชันอัปเดตค่า input ให้แสดงชื่อไฟล์ทั้งหมด
-//   function updateProductImgValue() {
-//     document.getElementById("product_img").value = uploadedFiles.join(", ");
-//   }
-
-//   return (
-//     <div className="p-4">
-//       <div id="img" className="dropzone border-2 border-dashed p-6 rounded-lg ">
-//         {/* พื้นที่ Dropzone */}
-//       </div>
-//       <input type="hidden" name="product_img" id="product_img" />
-//     </div>
-//   );
-// };
-
-// export default DropzoneComponent;
-
-// import { useCallback } from "react";
-// import { useDropzone } from "react-dropzone";
-
-// export default function FileUpload() {
-//   const onDrop = useCallback(async (acceptedFiles: File[]) => {
-//     const formData = new FormData();
-//     acceptedFiles.forEach((file) => {
-//       formData.append("file", file);
-//     });
-
-//     const response = await fetch("/api/uploadProduct", {
-//       method: "POST",
-//       body: formData,
-//     });
-
-//     const result = await response.json();
-//     console.log(result);
-//   }, []);
-
-//   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-//     onDrop,
-//     accept: { "image/*": [] }, // รองรับเฉพาะไฟล์ภาพ
-//     multiple: true, // อนุญาตให้อัปโหลดหลายไฟล์
-//   });
-
-//   return (
-//     <div
-//       {...getRootProps()}
-//       className="h-full border-2 border-dashed border-gray-400 p-6 text-center rounded-lg cursor-pointer "
-//     >
-//       <input {...getInputProps()} />
-//       {isDragActive ? (
-//         <p>วางไฟล์ที่นี่...</p>
-//       ) : (
-//         <p >ลากและวางไฟล์ที่นี่ หรือคลิกเพื่ออัปโหลด</p>
-//       )}
-//     </div>
-//   );
-// }
-
-// import { useEffect, useRef } from "react";
-// import Dropzone from "dropzone";
-
-// const MyDropzone = () => {
-//   const dropzoneRef = useRef(null);
-
-//   useEffect(() => {
-//     if (dropzoneRef.current) {
-//       const dz = new Dropzone(dropzoneRef.current, {
-//         url: "/api/uploadProduct", // API route
-//         paramName: "file", // ต้องตรงกับ API
-//         maxFiles: 5, // กำหนดจำนวนไฟล์สูงสุด
-//         uploadMultiple: true, // เปิดใช้งานอัปโหลดหลายไฟล์
-//         parallelUploads: 5, // จำนวนไฟล์ที่อัปโหลดพร้อมกัน
-//         autoProcessQueue: true,
-//         acceptedFiles: "image/*",
-//       });
-
-//       return () => dz.destroy(); // Cleanup Dropzone instance
-//     }
-//   }, []);
-
-//   return (
-//     <div ref={dropzoneRef} className="dropzone border-2 border-dashed p-10">
-//       <p>ลากและวางไฟล์ที่นี่ หรือคลิกเพื่ออัปโหลด</p>
-//     </div>
-//   );
-// };
-
-//export default MyDropzone;

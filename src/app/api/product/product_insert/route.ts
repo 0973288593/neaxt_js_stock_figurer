@@ -21,8 +21,11 @@ export async function POST(req: Request) {
 
         const arr_img = res.product_img.split(",")
         main_img = arr_img[0]
+      }else{
+         main_img = res.product_img
       }
     }
+
     const data =  {
         name: res.product_name,
         sku: res.product_sku,
