@@ -47,18 +47,18 @@ export async function POST(
   const oldImages = oldProduct.images || [];
 
   const newImages: string[] = Array.isArray(body.images)
-  ? body.images
-  : [];
+    ? body.images
+    : [];
   // =========================
   // 2. รูปเก่าของ Product
   // =========================
 
-  const oldImageNames = oldProduct.images
-    .flatMap((item) =>
-      item.img_name
-        .split(",")
-        .map((name) => name.trim())
-    );
+  const oldImageNames = oldImages.flatMap((item) =>
+    item.img_name
+      .split(",")
+      .map((name) => name.trim())
+      .filter(Boolean)
+  );
 
   // =========================
   // 3. หาไฟล์ที่ถูกลบ
@@ -87,25 +87,25 @@ export async function POST(
 
 
   for (const filename of removedImages) {
+    const safeFilename = path.basename(filename);
+
     const filePath = path.join(
       uploadDir,
-      filename
+      safeFilename
     );
 
     try {
       await fs.unlink(filePath);
 
       console.log(
-        "ลบไฟล์สำเร็จ:",
-        filePath
+        "DELETE FILE SUCCESS:",
+        safeFilename
       );
     } catch (error: any) {
-      // ถ้าไฟล์ไม่มีอยู่แล้ว
-      // ไม่ต้องทำให้ Update สินค้าล้ม
       if (error.code === "ENOENT") {
         console.log(
-          "ไม่พบไฟล์:",
-          filePath
+          "FILE NOT FOUND:",
+          safeFilename
         );
       } else {
         throw error;
@@ -119,7 +119,7 @@ export async function POST(
   const newBody = {
     name: body.product_name,
     description: body.description,
-    price_cost: body.product_cost,
+    price_cost: parseFloat(body.product_cost),
     sku: body.product_sku,
     price: body.product_price,
     image: body.product_img,

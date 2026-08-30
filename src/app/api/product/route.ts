@@ -39,13 +39,14 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '10');
+        const search = parseInt(searchParams.get('search') || ' ');
         const skip = (page - 1) * limit;
        
 
         const productModel = new ProductModel();
 
-        const product = await productModel.getAll(skip, limit);
-        const count_product = await productModel.getCountAll();
+        const product = await productModel.getAll(skip, limit, search);
+        const count_product = await productModel.getCountAll(search);
 
         const totalPages = Math.ceil(count_product / limit);
 

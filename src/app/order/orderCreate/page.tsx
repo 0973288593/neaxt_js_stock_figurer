@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 
+
 type Product = {
     id: string;
     name: string;
@@ -11,14 +12,18 @@ type Product = {
 };
 
 type Customer = {
-    id: string;
+    id: number;
     name: string;
-    phone: string;
+    phoneNumber?: string;
+    lineAccountName?: string;
+    tiktokAccountName?: string;
 };
 
 type OrderItem = Product & {
     quantity: number;
 };
+
+
 
 const mockProducts: Product[] = [
     {
@@ -44,46 +49,89 @@ const mockProducts: Product[] = [
     },
 ];
 
-const mockCustomers: Customer[] = [
-    {
-        id: "c1",
-        name: "สมชาย ใจดี",
-        phone: "081-111-1111",
-    },
-    {
-        id: "c2",
-        name: "สมหญิง ใจดี",
-        phone: "082-222-2222",
-    },
-];
 
 export default function NewOrderPage() {
     const [customerId, setCustomerId] = useState("");
     const [searchProduct, setSearchProduct] = useState("");
     const [items, setItems] = useState<OrderItem[]>([]);
     const [discount, setDiscount] = useState(0);
+    const [isCreateCustomer, setIsCreateCustomer] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState("");
+    const [customers, setCustomers] = useState<Customer[]>([]);
+    const [products, setProducts] = useState<any[]>([]);
+
+
+    const [customerForm, setCustomerForm] = useState({
+        name: "",
+        phoneNumber: '',
+        lineAccountName: "",
+        tiktokAccountName: "",
+    });
 
     const [paymentType, setPaymentType] = useState<
         "FULL" | "INSTALLMENT"
     >("FULL");
 
-    const selectedCustomer = mockCustomers.find(
-        (customer) => customer.id === customerId
-    );
+    // const selectedCustomer = customers.find(
+    //     (customer) => customer.id === customerId
+    // );
 
-    const filteredProducts = useMemo(() => {
-        if (!searchProduct.trim()) {
-            return [];
+
+    const getCustomer = async () => {
+        try {
+
+            const res = await fetch(
+                `/api/customer?page=${1}&limit=${10}`
+            );
+
+            if (!res.ok) {
+                throw new Error("ไม่สามารถดึงข้อมูล Customer ได้");
+            }
+
+            const data = await res.json();
+
+            const customerList = data.data.customer_list;
+
+
+            setCustomers(customerList);
+            if (customerList.length > 0) {
+                setCustomerId(customerList[0].id);
+            }
+
+
+
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
         }
+    };
 
-        const search = searchProduct.toLowerCase();
 
-        return mockProducts.filter(
-            (product) =>
-                product.name.toLowerCase().includes(search) ||
-                product.sku.toLowerCase().includes(search)
-        );
-    }, [searchProduct]);
+    const searchProducts = async () => {
+        try {
+            const response = await fetch(
+                `/api/product?search=${encodeURIComponent(searchProduct)}`
+            );
+
+            if (!response.ok) {
+                throw new Error("โหลด Product ไม่สำเร็จ");
+            }
+            const data = await response.json();
+
+            const products = data.data.product_list.map((product) => ({
+                ...product,
+                quantity: 1,
+            }));
+
+            setProducts(data.data.product_list);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+
 
     const subtotal = useMemo(() => {
         return items.reduce(
@@ -109,6 +157,7 @@ export default function NewOrderPage() {
     };
 
     const addProduct = (product: Product) => {
+
         setItems((currentItems) => {
             const existingItem = currentItems.find(
                 (item) => item.id === product.id
@@ -160,6 +209,10 @@ export default function NewOrderPage() {
         );
     };
 
+    const changStatusCustomer = () => {
+        setIsCreateCustomer((prev) => !prev);
+    };
+
     const decreaseQuantity = (productId: string) => {
         setItems((currentItems) =>
             currentItems
@@ -185,7 +238,7 @@ export default function NewOrderPage() {
         );
     };
 
-    const handleSubmit = (
+    const handleSubmitCreate = (
         event: React.FormEvent<HTMLFormElement>
     ) => {
         event.preventDefault();
@@ -218,6 +271,60 @@ export default function NewOrderPage() {
         // });
     };
 
+    const subMitcustomerForm = async () => {
+
+
+        try {
+
+            const response = await fetch("/api/customer/insert_customer", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(customerForm),
+            });
+
+            const result = await response.json();
+            console.log(result)
+            if (response.ok) {
+
+
+                setMessage("บันทึกข้อมูลสำเร็จ!");
+                setCustomerForm({
+                    name: "",
+                    phoneNumber: "",
+                    lineAccountName: "",
+                    tiktokAccountName: "",
+                });
+                await getCustomer()
+                setIsCreateCustomer(true)
+            } else {
+                setMessage(result.error || "เกิดข้อผิดพลาด");
+            }
+
+        } catch (error) {
+            setMessage("เกิดข้อผิดพลาดในการส่งข้อมูล");
+        }
+
+        setLoading(false);
+    }
+
+
+    const handleChangeCustomerForm = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const { name, value } = e.target;
+
+        setCustomerForm((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+
+    };
+
+
+    useMemo(() => {
+        getCustomer();
+    }, []);
+
     return (
         <main className="min-h-screen bg-gray-100 px-4 py-6">
             <div className="mx-auto max-w-7xl">
@@ -233,7 +340,7 @@ export default function NewOrderPage() {
                     </p>
                 </div>
 
-                <form onSubmit={handleSubmit}>
+                <form >
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
                         {/* LEFT */}
@@ -245,36 +352,112 @@ export default function NewOrderPage() {
                                     ข้อมูลลูกค้า
                                 </h2>
 
-                                <button type="button" className="text-white bg-brand box-border border border-transparent hover:bg-brand-strong focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none">Default</button>
-
-
-                                <label className="mb-2 block text-sm font-medium text-gray-700">
-                                    ลูกค้า
-                                </label>
-
-                                <select
-                                    value={customerId}
-                                    onChange={(event) =>
-                                        setCustomerId(event.target.value)
-                                    }
-                                    required
-                                    className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                <button
+                                    type="button"
+                                    onClick={changStatusCustomer}
+                                    className="mb-2 rounded-lg border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
                                 >
-                                    <option value="">
-                                        -- เลือกลูกค้า --
-                                    </option>
+                                    {isCreateCustomer
+                                        ? "เลือกชื่อลูกค้า"
+                                        : "+ สร้างลูกค้าใหม่"}
+                                </button>
 
-                                    {mockCustomers.map((customer) => (
-                                        <option
-                                            key={customer.id}
-                                            value={customer.id}
+                                {!isCreateCustomer ? (
+                                    // =========================
+                                    // Box เลือกลูกค้า
+                                    // =========================
+                                    <div>
+                                        <label className="mb-2 block text-sm font-medium">
+                                            เลือกลูกค้า
+                                        </label>
+
+                                        <select
+                                            className="w-full rounded-lg border px-4 py-3"
+                                            value={customerId}
+                                            onChange={(e) => setCustomerId(e.target.value)}
                                         >
-                                            {customer.name} - {customer.phone}
-                                        </option>
-                                    ))}
-                                </select>
+                                            {customers.map((item) => (
+                                                <option key={item.id} value={item.id}>
+                                                    {item.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                ) : (
+                                    // =========================
+                                    // Box สร้างลูกค้า
+                                    // =========================
+                                    <div className="space-y-4">
 
-                                {selectedCustomer && (
+                                        <div>
+                                            <label className="mb-2 block text-sm font-medium">
+                                                ชื่อลูกค้า
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                name="name"
+                                                value={customerForm.name}
+                                                onChange={handleChangeCustomerForm}
+                                                placeholder="กรอกชื่อลูกค้า"
+                                                className="w-full rounded-lg border px-4 py-3"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="mb-2 block text-sm font-medium">
+                                                เบอร์โทรศัพท์
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                name="phoneNumber"
+                                                placeholder="กรอกเบอร์โทรศัพท์"
+                                                value={customerForm.phoneNumber}
+                                                onChange={handleChangeCustomerForm}
+                                                className="w-full rounded-lg border px-4 py-3"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="mb-2 block text-sm font-medium">
+                                                line account
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                name="lineAccountName"
+                                                placeholder="ชื่อline account"
+                                                onChange={handleChangeCustomerForm}
+                                                value={customerForm.lineAccountName}
+                                                className="w-full rounded-lg border px-4 py-3"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="mb-2 block text-sm font-medium">
+                                                tiktok account
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                name="tiktokAccountName"
+                                                placeholder="ชื่อtiktok account"
+                                                onChange={handleChangeCustomerForm}
+                                                value={customerForm.tiktokAccountName}
+                                                className="w-full rounded-lg border px-4 py-3"
+                                            />
+                                        </div>
+                                        <div className="flex justify-end-safe ">
+                                            <div onClick={subMitcustomerForm} className="bg-blue-500 hover:bg-blue-700 p-2 rounded-lg text-white">Save</div>
+
+                                        </div>
+
+                                    </div>
+                                )}
+
+
+
+                                {/* {selectedCustomer && (
                                     <div className="mt-4 rounded-lg bg-gray-50 p-4">
                                         <p className="font-medium text-gray-900">
                                             {selectedCustomer.name}
@@ -284,7 +467,7 @@ export default function NewOrderPage() {
                                             {selectedCustomer.phone}
                                         </p>
                                     </div>
-                                )}
+                                )} */}
                             </section>
 
                             {/* Product */}
@@ -300,14 +483,19 @@ export default function NewOrderPage() {
                                         onChange={(event) =>
                                             setSearchProduct(event.target.value)
                                         }
+                                        onKeyDown={(event) => {
+                                            if (event.key === "Enter") {
+                                                searchProducts();
+                                            }
+                                        }}
                                         placeholder="ค้นหาชื่อสินค้า หรือ SKU..."
                                         className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                     />
 
                                     {searchProduct && (
                                         <div className="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
-                                            {filteredProducts.length > 0 ? (
-                                                filteredProducts.map(
+                                            {products.length > 0 ? (
+                                                products.map(
                                                     (product) => (
                                                         <button
                                                             key={product.id}
@@ -318,16 +506,26 @@ export default function NewOrderPage() {
                                                             className="flex w-full items-center justify-between border-b border-gray-100 px-4 py-3 text-left last:border-b-0 hover:bg-gray-50"
                                                         >
                                                             <div>
-                                                                <p className="font-medium text-gray-900">
-                                                                    {product.name}
-                                                                </p>
 
-                                                                <p className="mt-1 text-xs text-gray-500">
-                                                                    SKU: {product.sku}
-                                                                </p>
+
+                                                                <div className="flex items-center">
+                                                                    <div style={{ width: '50px', height: '50px' }}>
+                                                                        <img style={{ width: '50px', height: '50px' }} src={`/uploads/product/${product.image}`} alt={product.name} />
+                                                                    </div>
+                                                                    <div className="ms-2">
+                                                                        <p className="font-medium text-gray-900 ">
+                                                                            {product.name}
+
+                                                                        </p>
+                                                                        <p className="mt-1 text-xs text-gray-500">
+                                                                            SKU: {product.sku}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
                                                             </div>
 
                                                             <div className="text-right">
+
                                                                 <p className="font-medium">
                                                                     ฿
                                                                     {formatMoney(
@@ -369,8 +567,12 @@ export default function NewOrderPage() {
                                                 key={item.id}
                                                 className="flex flex-col gap-4 rounded-lg border border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between"
                                             >
+                                                <div>
+                                                    <img style={{ width: '50px', height: '50px' }} src={`/uploads/product/${item.image}`} alt={item.name} />
+                                                </div>
                                                 {/* Product */}
                                                 <div className="min-w-0 flex-1">
+
                                                     <p className="font-medium text-gray-900">
                                                         {item.name}
                                                     </p>
@@ -618,7 +820,7 @@ export default function NewOrderPage() {
                                     </button>
 
                                     <button
-                                        type="submit"
+                                        onClick={handleSubmitCreate}
                                         disabled={
                                             !customerId ||
                                             items.length === 0

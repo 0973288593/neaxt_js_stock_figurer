@@ -32,14 +32,15 @@ export default function createProduct() {
     }
   }, [uploadedFiles]);
 
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({
       ...prevState,
       [name]: value,
     }));
-    
   };
+  
 
   //  const handleDrop = (acceptedFiles: File[]) => {
   //    setFormData({ ...formData, product_img: acceptedFiles });
@@ -96,12 +97,11 @@ export default function createProduct() {
   };
 
   return (
-    <div className="mt-10 p-6 bg-white shadow-md rounded-lg">
+    <div className="mt-10 p-6 bg-white shadow-md rounded-lg container mx-auto">
       <div className="my-1">
         <a
           href="/products"
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
           Black
         </a>
       </div>
