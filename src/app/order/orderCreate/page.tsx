@@ -238,7 +238,7 @@ export default function NewOrderPage() {
         );
     };
 
-    const handleSubmitCreate = (
+    const handleSubmitCreate = async(
         event: React.FormEvent<HTMLFormElement>
     ) => {
         event.preventDefault();
@@ -257,18 +257,18 @@ export default function NewOrderPage() {
             paymentType,
         };
 
-        console.log("Order Data:", orderData);
+        // console.log("Order Data:", orderData);
 
         // TODO:
         // ส่ง orderData ไป API
         //
-        // await fetch("/api/orders", {
-        //   method: "POST",
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //   },
-        //   body: JSON.stringify(orderData),
-        // });
+        await fetch("/api/order/order_insert", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(orderData),
+        });
     };
 
     const subMitcustomerForm = async () => {
@@ -327,6 +327,7 @@ export default function NewOrderPage() {
 
     return (
         <main className="min-h-screen bg-gray-100 px-4 py-6">
+        testbranch
             <div className="mx-auto max-w-7xl">
 
                 {/* Header */}

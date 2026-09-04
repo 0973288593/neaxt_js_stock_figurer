@@ -20,7 +20,7 @@ class Customer {
   }
 
 
-   // ✅ GET ALL
+  // ✅ GET ALL
   async getAll(page, limit) {
 
     return await prisma.Customer.findMany({
@@ -32,13 +32,21 @@ class Customer {
     });
   }
   async getCountAll() {
-
     const count = await prisma.Customer.count();
     // console.log("COUNT:", count, typeof count);
     //return await prisma.product.count();
-
     return count;
   }
+
+  async getCustomerById(id: number) {
+
+    return id
+
+    // return await prisma.Customer.findUnique({
+    //   where: { id: id }, 
+    // });
+  }
+
 }
 
 export default Customer;
