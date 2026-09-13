@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
@@ -14,6 +16,11 @@
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 0, 0, 0;
   }
+}
+
+
+ *{
+  cursor: url('https://cdn.cursors-4u.net/previews/kamen-rider-kabuto-8822eb2b-32.webp') 32 32, auto !important;
 }
 
 body {

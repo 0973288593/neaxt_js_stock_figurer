@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useEffect } from 'react';
+
 
 
 type Product = {
@@ -80,31 +82,23 @@ export default function NewOrderPage() {
 
     const getCustomer = async () => {
         try {
-
-            const res = await fetch(
-                `/api/customer?page=${1}&limit=${10}`
-            );
+            const res = await fetch('/api/customer?page=1&limit=10');
 
             if (!res.ok) {
-                throw new Error("ไม่สามารถดึงข้อมูล Customer ได้");
+                throw new Error(`ไม่สามารถดึงข้อมูล Customer ได้: ${res.status}`);
             }
 
             const data = await res.json();
 
             const customerList = data.data.customer_list;
 
-
             setCustomers(customerList);
+
             if (customerList.length > 0) {
                 setCustomerId(customerList[0].id);
             }
-
-
-
         } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
+            console.error('getCustomer error:', error);
         }
     };
 
@@ -238,7 +232,7 @@ export default function NewOrderPage() {
         );
     };
 
-    const handleSubmitCreate = async(
+    const handleSubmitCreate = async (
         event: React.FormEvent<HTMLFormElement>
     ) => {
         event.preventDefault();
@@ -248,6 +242,8 @@ export default function NewOrderPage() {
             items: items.map((item) => ({
                 productId: item.id,
                 quantity: item.quantity,
+                prductName: item.name,
+                prductSku: item.sku,
                 price: item.price,
                 subtotal: item.price * item.quantity,
             })),
@@ -262,13 +258,19 @@ export default function NewOrderPage() {
         // TODO:
         // ส่ง orderData ไป API
         //
-        await fetch("/api/order/order_insert", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(orderData),
+       const response =  await fetch("/api/order/order_insert", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(orderData),
         });
+        const result = await response.json();
+         if (response.ok) {
+            alert('บันทึกสินค้าใน Order สำเร็จ');
+              window.location.href = '/order/orderList';
+         }
+
     };
 
     const subMitcustomerForm = async () => {
@@ -321,14 +323,13 @@ export default function NewOrderPage() {
     };
 
 
-    useMemo(() => {
+    useEffect(() => {
         getCustomer();
     }, []);
 
     return (
         <main className="min-h-screen bg-gray-100 px-4 py-6">
             <div className="mx-auto max-w-7xl">
-
                 {/* Header */}
                 <div className="mb-6">
                     <h1 className="text-2xl font-bold text-gray-900">

@@ -1,24 +1,99 @@
 import prisma from "@/lib/prisma";
 
 export type Order = {
-  name: string;
-  lineAccount: string;
-  phoneNumber: string;
-  tiktokAccount: string;
+    orderNumber: string;
+    customer_id: number;
+    paymentStatus: string;
+    status: string;
+    subtotal: number;
+    discount: number;
+    total: number;
+    customerName: string;
+    customerPhone: string;
+    createdAt: Date;
+    updatedAt: Date;
 };
-
 
 export class OrderModel {
 
     async insert(data: Order) {
-        return prisma.Order.create({
+        const order = await prisma.Order.create({
             data: {
-                name: data.name,
-                lineAccount: data.lineAccount,
-                phoneNumber: data.phoneNumber,
-                tiktokAccount: data.tiktokAccount,
+                orderNumber: data.orderNumber.toString(),
+                customer_id: data.customer_id,
+                status: data.status,
+                paymentStatus: 'PENDING',
+                subtotal: data.subtotal,
+                discount: data.discount,
+                shippingCost: 0,
+                tax: 0,
+                total: data.total,
+                customerName: data.customerName,
+                customerEmail: '',
+                customerPhone: data.customerPhone,
+                shippingAddress: '',
+                shippingState: '',
+                shippingZip: '',
+                shippingCountry: '',
+                note: '',
+                createdAt: data.createdAt,
+                updatedAt: data.updatedAt,
+            },
+            select: {
+                id: true,
+            },
+        });
+
+        return order.id;
+    }
+
+    async getAll(page, limit, search) {
+        return await prisma.Order.findMany({
+            skip: page,
+            take: limit,
+            where: search
+                ? {
+                    OR: [
+                        {
+                            orderNumber: {
+                                contains: search,
+                                mode: "insensitive",
+                            },
+                        },
+                        {
+                            customerName: {
+                                contains: search,
+                                mode: "insensitive",
+                            },
+                        }
+                    ],
+                }
+                : undefined,
+
+            orderBy: {
+                createdAt: "desc",
             },
         });
     }
+
+    async getCountAll(search) {
+
+        const count = await prisma.Order.count();
+        // console.log("COUNT:", count, typeof count);
+        //return await prisma.product.count();
+
+        return count;
+    }
+
+    async getById(id: string) {
+        const record = await prisma.Order.findUnique({
+            where: {
+                id: id
+            }
+        });
+
+        return record;
+    }
+
 
 }

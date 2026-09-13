@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import TableOrder from "../../../components/table/order_table"
 
 type OrderStatus =
   | "PENDING"
@@ -128,7 +129,37 @@ export default function OrdersPage() {
 
   const [currentPage, setCurrentPage] = useState(1);
 
+
+  const [orderList, setOrderList] = useState([]);
+  const [orderCount, setOrderCount] = useState('');
+  const [orderTotal, setOrderTotal] = useState('');
+  const [pagination, setPagination] = useState({});
+
+
+
+
   const itemsPerPage = 5;
+  const limit = 20;
+
+
+  const getOrder = async () => {
+
+    console.log('getOrder')
+
+    const res = await fetch(
+      `/api/order?page=${currentPage}&limit=${limit}`
+    );
+    const data = await res.json();
+
+    const totalOrder = data.data.order_list.reduce(
+      (sum, order) => sum + Number(order.total),
+      0
+    );
+    setOrderTotal(totalOrder)
+    setOrderCount(data.data.order_count);
+    setOrderList(data.data.order_list);
+    setPagination(data.data.pagination);
+  }
 
   const formatMoney = (value: number) => {
     return new Intl.NumberFormat("th-TH", {
@@ -201,8 +232,15 @@ export default function OrdersPage() {
     setCurrentPage(1);
   };
 
+
+  useEffect(() => {
+    getOrder();
+  }, [currentPage, limit])
+
   return (
     <main className="min-h-screen bg-gray-100 p-6">
+
+
       <div className="mx-auto max-w-7xl">
 
         {/* Header */}
@@ -239,7 +277,7 @@ export default function OrdersPage() {
             </p>
 
             <p className="mt-2 text-2xl font-bold">
-              {filteredOrders.length}
+              {orderCount}
             </p>
           </div>
 
@@ -249,7 +287,7 @@ export default function OrdersPage() {
             </p>
 
             <p className="mt-2 text-2xl font-bold text-blue-600">
-              ฿{formatMoney(totalOrderAmount)}
+              ฿{formatMoney(orderTotal)}
             </p>
           </div>
 
@@ -321,8 +359,8 @@ export default function OrdersPage() {
                 onChange={(event) => {
                   setStatus(
                     event.target.value as
-                      | "ALL"
-                      | OrderStatus
+                    | "ALL"
+                    | OrderStatus
                   );
                   setCurrentPage(1);
                 }}
@@ -365,8 +403,8 @@ export default function OrdersPage() {
                 onChange={(event) => {
                   setPaymentType(
                     event.target.value as
-                      | "ALL"
-                      | PaymentType
+                    | "ALL"
+                    | PaymentType
                   );
                   setCurrentPage(1);
                 }}
@@ -392,23 +430,27 @@ export default function OrdersPage() {
           {(search ||
             status !== "ALL" ||
             paymentType !== "ALL") && (
-            <div className="mt-4">
-              <button
-                type="button"
-                onClick={resetFilters}
-                className="text-sm font-medium text-blue-600 hover:text-blue-700"
-              >
-                ล้างตัวกรอง
-              </button>
-            </div>
-          )}
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                >
+                  ล้างตัวกรอง
+                </button>
+              </div>
+            )}
 
         </div>
-
+        {/* <TableOrder data={mockOrders} /> */}
         {/* Table */}
+
         <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
 
           <div className="overflow-x-auto">
+
+
+
 
             <table className="w-full min-w-[1000px]">
 
@@ -449,13 +491,12 @@ export default function OrdersPage() {
 
                 </tr>
               </thead>
-
               <tbody className="divide-y">
 
-                {paginatedOrders.map((order) => {
+                {orderList.map((order) => {
                   const statusInfo =
                     statusConfig[
-                      order.status
+                    order.paymentStatus
                     ];
 
                   return (
@@ -474,7 +515,7 @@ export default function OrdersPage() {
                           }}
                           className="font-semibold text-blue-600 hover:text-blue-700"
                         >
-                          {order.orderNo}
+                          {order.orderNumber}
                         </button>
                       </td>
 
@@ -506,8 +547,8 @@ export default function OrdersPage() {
                       {/* Payment */}
                       <td className="px-6 py-4 text-center">
 
-                        {order.paymentType ===
-                        "INSTALLMENT" ? (
+                        {order.status ===
+                          "INSTALLMENT" ? (
                           <span className="inline-flex rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700">
                             มัดจำ / ผ่อน
                           </span>
@@ -544,7 +585,7 @@ export default function OrdersPage() {
                             type="button"
                             onClick={() => {
                               window.location.href =
-                                `/orders/${order.id}`;
+                                `/order/orderDetail/${order.id}`;
                             }}
                             className="rounded-lg border border-gray-300 px-3 py-2 text-xs font-medium hover:bg-gray-50"
                           >
@@ -553,17 +594,17 @@ export default function OrdersPage() {
 
                           {order.paymentType ===
                             "INSTALLMENT" && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                window.location.href =
-                                  `/payment-plans/new?orderId=${order.id}`;
-                              }}
-                              className="rounded-lg bg-orange-500 px-3 py-2 text-xs font-medium text-white hover:bg-orange-600"
-                            >
-                              Payment Plan
-                            </button>
-                          )}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  window.location.href =
+                                    `/payment-plans/new?orderId=${order.id}`;
+                                }}
+                                className="rounded-lg bg-orange-500 px-3 py-2 text-xs font-medium text-white hover:bg-orange-600"
+                              >
+                                Payment Plan
+                              </button>
+                            )}
 
                         </div>
 
@@ -592,6 +633,7 @@ export default function OrdersPage() {
 
               </tbody>
 
+
             </table>
 
           </div>
@@ -612,7 +654,7 @@ export default function OrdersPage() {
                   {" "}
                   {Math.min(
                     currentPage *
-                      itemsPerPage,
+                    itemsPerPage,
                     filteredOrders.length
                   )}
                 </span>{" "}

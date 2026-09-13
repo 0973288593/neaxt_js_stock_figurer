@@ -40,11 +40,9 @@ class Customer {
 
   async getCustomerById(id: number) {
 
-    return id
-
-    // return await prisma.Customer.findUnique({
-    //   where: { id: id }, 
-    // });
+    return await prisma.Customer.findUnique({
+      where: { id: id }, 
+    });
   }
 
 }

@@ -1,0 +1,486 @@
+"use client";
+
+import "../../../../../public/css/order-detail.css";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+
+
+
+
+
+
+export default function orderDetail() {
+    const router = useRouter();
+    const params = useParams();
+    const [orderDetail, setOrderDetail] = useState({});
+    const [productList, setProductList] = useState([]);
+    const [selectedImage, setSelectedImage] = useState(null);
+    const id = params.id;
+
+
+    const loadOrderDetail = async () => {
+
+        try {
+            const res = await fetch(`/api/order/${id}`);
+            const data = await res.json();
+
+
+            setOrderDetail(data.data.orderDetail)
+            setProductList(data.data.productList)
+
+
+
+
+
+        } catch (error) {
+
+            console.log(error)
+
+        }
+
+    }
+
+    useEffect(() => {
+
+        loadOrderDetail();
+
+    }, []);
+
+
+    return (
+        <div className="dashboard">
+            {/* ================= MAIN ================= */}
+            <div className="main">
+                {/* ================= CONTENT ================= */}
+                <main className="content">
+
+                    <div className="content-grid">
+
+
+                        {/* ================= LEFT ================= */}
+                        <div className="left-column">
+
+
+                            {/* ORDER PRODUCTS */}
+                            <section className="card order-card">
+
+                                <div className="card-title">
+
+                                    <h2>
+                                        Order #{orderDetail.orderNumber}
+                                    </h2>
+
+                                    <button className="invoice-btn">
+                                        Invoice
+                                    </button>
+
+                                </div>
+
+
+                                {/* Table Header */}
+                                <div className="product-table-header">
+
+                                    <span>PRODUCT</span>
+
+                                    <span>
+                                        PRICE
+                                        <small>↕</small>
+                                    </span>
+
+                                    <span>QUANTITY</span>
+
+                                    <span>
+                                        TOTAL AMOUNT
+                                        <small>↕</small>
+                                    </span>
+
+                                </div>
+
+
+                                {productList.map((item) => (
+
+                                    <div className="product-row">
+
+                                        <div className="product-name">
+
+                                            <div className="product-image">
+
+                                                <img style={{ width: '50px', height: '50px' }} src={`/uploads/product/${item.product.image}`} alt={item.product.name}
+                                                    onClick={() =>
+                                                        setSelectedImage(
+                                                            `/uploads/product/${item.product.image}`
+                                                        )
+                                                    } />
+                                            </div>
+
+                                            <div>
+                                                <h3>
+                                                    {item.product.name}
+                                                </h3>
+
+                                                <p>
+                                                    PRODUCT ID: 189734
+                                                </p>
+                                            </div>
+
+                                        </div>
+
+                                        <span>$220.99</span>
+
+                                        <span>01</span>
+
+                                        <strong>$220.99</strong>
+
+                                    </div>
+                                ))}
+
+
+                            </section>
+
+
+                            {/* COMMENT + SHIPPING */}
+                            <div className="two-column">
+
+
+                                {/* Comment */}
+                                <section className="card comment-card">
+
+                                    <h2>Comment</h2>
+
+                                    <textarea
+                                        placeholder="Add a Note: This is a small notes section that only the seller can see."
+                                    />
+
+                                </section>
+
+
+                                {/* Shipping */}
+                                <section className="card shipping-card">
+
+                                    <h2>
+                                        Shipping Information
+                                    </h2>
+
+                                    <div className="info-row">
+                                        <span>FULL NAME</span>
+                                        <strong>Gabriel Pires</strong>
+                                    </div>
+
+                                    <div className="info-row">
+                                        <span>ADDRESS</span>
+                                        <strong>
+                                            12 Tompkins Drive, Port Orange...
+                                        </strong>
+                                    </div>
+
+                                    <div className="info-row">
+                                        <span>PHONE NUMBER</span>
+                                        <strong>
+                                            +1-9846499950
+                                        </strong>
+                                    </div>
+
+                                    <div className="info-row">
+                                        <span>EMAIL</span>
+                                        <strong>
+                                            dashboard@comvi.com
+                                        </strong>
+                                    </div>
+
+                                </section>
+
+                            </div>
+
+
+                            {/* BANNER + PAYMENT */}
+                            <div className="two-column bottom-row">
+
+
+                                {/* Banner */}
+                                <section className="sale-banner">
+
+                                    <div>
+                                        <h2>
+                                            Sale Designer
+                                            <br />
+                                            Brands
+                                        </h2>
+                                    </div>
+
+                                    <span className="sale-badge">
+                                        SALE -32%
+                                    </span>
+
+                                </section>
+
+
+                                {/* Payment */}
+                                <section className="card payment-card">
+
+                                    <h2>
+                                        Payment Details
+                                    </h2>
+
+                                    <div className="info-row">
+                                        <span>TRANSACTIONS</span>
+                                        <strong>
+                                            #AME123461272341
+                                        </strong>
+                                    </div>
+
+                                    <div className="info-row">
+                                        <span>PAYMENT METHOD</span>
+                                        <strong>
+                                            Debit Card
+                                        </strong>
+                                    </div>
+
+                                    <div className="info-row">
+                                        <span>CARD HOLDER NAME</span>
+                                        <strong>
+                                            Gabriel Pires
+                                        </strong>
+                                    </div>
+
+                                    <div className="info-row">
+                                        <span>CARD NUMBER</span>
+                                        <strong>
+                                            XXXX XXXX XXXX 1235
+                                        </strong>
+                                    </div>
+
+                                </section>
+
+                            </div>
+
+                        </div>
+
+
+                        {/* ================= RIGHT ================= */}
+                        <aside className="right-column">
+
+
+                            {/* Order Summary */}
+                            <section className="card summary-card">
+
+                                <h2>
+                                    Order Summary
+                                </h2>
+
+                                <div className="summary-row">
+                                    <span>SUB TOTAL :</span>
+                                    <strong>$11488.96</strong>
+                                </div>
+
+                                <div className="summary-row">
+                                    <span>DISCOUNT :</span>
+                                    <strong>$60.00</strong>
+                                </div>
+
+                                <div className="summary-row">
+                                    <span>SHIPPING CHARGE :</span>
+                                    <strong>$15.00</strong>
+                                </div>
+
+                                <div className="summary-row">
+                                    <span>ESTIMATED TAX :</span>
+                                    <strong>$00.00</strong>
+                                </div>
+
+                                <div className="summary-row total-row">
+                                    <span>TOTAL (USD) :</span>
+                                    <strong>$1443.96</strong>
+                                </div>
+
+
+                                <div className="discount-code">
+
+                                    <input
+                                        type="text"
+                                        placeholder="Enter Discount Code"
+                                    />
+
+                                    <button>
+                                        Apply
+                                    </button>
+
+                                </div>
+
+                            </section>
+
+
+                            {/* Track Order */}
+                            <section className="card tracking-card">
+
+                                <h2>
+                                    Track Order
+                                </h2>
+
+                                <p className="tracking-id">
+                                    TRACKING ID: 1004152012012
+                                </p>
+
+
+                                <div className="tracking-list">
+
+
+                                    {/* Step */}
+                                    <div className="tracking-item active">
+
+                                        <div className="tracking-icon">
+                                            ♧
+                                        </div>
+
+                                        <div>
+                                            <h3>
+                                                Order Placed
+                                            </h3>
+
+                                            <p>
+                                                An order has been placed
+                                            </p>
+
+                                            <small>
+                                                Mar 21 2023 07:22 AM
+                                            </small>
+                                        </div>
+
+                                    </div>
+
+
+                                    {/* Step */}
+                                    <div className="tracking-item active">
+
+                                        <div className="tracking-icon">
+                                            ♧
+                                        </div>
+
+                                        <div>
+                                            <h3>
+                                                Packed
+                                            </h3>
+
+                                            <p>
+                                                Picked up by courier partner
+                                            </p>
+
+                                            <small>
+                                                Mar 21 2023 07:22 AM
+                                            </small>
+                                        </div>
+
+                                    </div>
+
+
+                                    {/* Step */}
+                                    <div className="tracking-item active">
+
+                                        <div className="tracking-icon">
+                                            🚚
+                                        </div>
+
+                                        <div>
+                                            <h3>
+                                                Shipped
+                                            </h3>
+
+                                            <p>
+                                                QWT Logistics
+                                            </p>
+
+                                            <small>
+                                                Mar 21 2023 07:22 AM
+                                            </small>
+                                        </div>
+
+                                    </div>
+
+
+                                    {/* Step */}
+                                    <div className="tracking-item">
+
+                                        <div className="tracking-icon">
+                                            ♧
+                                        </div>
+
+                                        <div>
+                                            <h3>
+                                                Out for Delivery
+                                            </h3>
+
+                                            <p>
+                                                An order has been placed.
+                                            </p>
+
+                                            <small>
+                                                Mar 21 2023 07:22 AM
+                                            </small>
+                                        </div>
+
+                                    </div>
+
+
+                                    {/* Step */}
+                                    <div className="tracking-item">
+
+                                        <div className="tracking-icon">
+                                            ▱
+                                        </div>
+
+                                        <div>
+                                            <h3>
+                                                Delivered
+                                            </h3>
+
+                                            <p>
+                                                An order has been placed.
+                                            </p>
+
+                                            <small>
+                                                Mar 21 2023 07:22 AM
+                                            </small>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </section>
+
+                        </aside>
+
+                    </div>
+
+                </main>
+
+            </div>
+
+            {selectedImage && (
+                <div
+                    className="image-modal"
+                    onClick={() => setSelectedImage(null)}
+                >
+                    <div
+                        className="image-modal-content"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            className="close-button"
+                            onClick={() => setSelectedImage(null)}
+                        >
+                            ×
+                        </button>
+
+                        <img
+                            src={selectedImage}
+                            alt="Product preview"
+                        />
+                    </div>
+                </div>
+            )}
+        </div>
+
+    );
+
+
+}

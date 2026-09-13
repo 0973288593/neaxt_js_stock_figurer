@@ -4,10 +4,8 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import FileUpload from "@/app/ui/Dropzone";
 import { useCallback } from "react";
+
 // src\app\globals.css
-
-
-
 
 
 export default function EditProduct() {
@@ -18,8 +16,6 @@ export default function EditProduct() {
   const id = params.id;
   const [loading, setLoading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
-
-
 
   const [formData, setFormData] = useState({
     product_name: "",
