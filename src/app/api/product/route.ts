@@ -39,7 +39,7 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '10');
-        const search = parseInt(searchParams.get('search') || ' ');
+        const search = searchParams.get("search")?.trim() ?? "";
         const skip = (page - 1) * limit;
        
 

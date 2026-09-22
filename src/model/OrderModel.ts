@@ -36,6 +36,8 @@ export class OrderModel {
                 shippingZip: '',
                 shippingCountry: '',
                 note: '',
+                totalCost: data.totalCost,
+                profit: data.profit,
                 createdAt: data.createdAt,
                 updatedAt: data.updatedAt,
             },
@@ -95,5 +97,25 @@ export class OrderModel {
         return record;
     }
 
+
+    async updateOrder(id: string, data: object) {
+        return await prisma.Order.updateMany({
+            where: {
+                id: id,
+            },
+            data,
+        });
+    }
+
+    async deleteOrder(id: string) {
+
+        return await prisma.Order.delete({
+            where: {
+                id: id
+            },
+        });
+
+
+    }
 
 }

@@ -23,7 +23,7 @@ body {
 
 
 .main {
-  width: calc(100% - 250px);
+  width: calc(100% - 136px);
   margin-left: 88px;
   padding-right: 24px;
 }
@@ -435,7 +435,7 @@ body {
 }
 
 .info-row strong {
-  color: #ddd;
+  color: #827e7e;
 
   font-weight: 400;
 

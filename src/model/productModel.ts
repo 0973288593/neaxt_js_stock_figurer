@@ -65,34 +65,32 @@ export class ProductModel {
   //   });
   // }
   async getAll(page, limit, search) {
-  return await prisma.product.findMany({
-    skip: page,
-    take: limit,
+    return await prisma.product.findMany({
+      skip: page,
+      take: limit,
 
-    where: search
-      ? {
+      where: search
+        ? {
           OR: [
             {
               name: {
-                contains: search,
-                mode: "insensitive",
+                contains: search
               },
             },
             {
               sku: {
-                contains: search,
-                mode: "insensitive",
+                contains: search
               },
             }
           ],
         }
-      : undefined,
+        : undefined,
 
-    orderBy: {
-      created_at: "desc",
-    },
-  });
-}
+      orderBy: {
+        created_at: "desc",
+      },
+    });
+  }
 
   async getCountAll(search) {
 

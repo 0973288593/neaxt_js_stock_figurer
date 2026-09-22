@@ -1,3 +1,5 @@
+""
+
 import { NextResponse } from "next/server";
 import { OrderModel } from "@/model/OrderModel";
 import { OrderItemModel } from "@/model/OrderItemModel";
@@ -23,7 +25,7 @@ export async function POST(req: Request) {
 
         const data_order_insrert = {
             orderNumber: orderNumber,
-            customer_id: res.customerId,
+            customer_id: parseInt(res.customerId),
             status: res.paymentType,
             paymentStatus: '',
             subtotal: res.subtotal,
@@ -39,11 +41,16 @@ export async function POST(req: Request) {
             shippingZip: '',
             shippingCountry: '',
             note: '',
+            totalCost: res.totalCost,
+            profit: res.subtotal - res.totalCost,
             createdAt: now.toISOString(),
             updatedAt: now.toISOString(),
         }
 
+      
+
         const resultOrder = await orderModel.insert(data_order_insrert)
+
 
 
 

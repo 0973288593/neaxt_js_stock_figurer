@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import TableOrder from "../../../components/table/order_table"
+import ConfirmDeleteModal from "@/components/modal/ConfirmDeleteModal";
 
 type OrderStatus =
   | "PENDING"
@@ -134,6 +135,9 @@ export default function OrdersPage() {
   const [orderCount, setOrderCount] = useState('');
   const [orderTotal, setOrderTotal] = useState('');
   const [pagination, setPagination] = useState({});
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
 
 
@@ -225,11 +229,43 @@ export default function OrdersPage() {
     0
   );
 
+
+
   const resetFilters = () => {
     setSearch("");
     setStatus("ALL");
     setPaymentType("ALL");
     setCurrentPage(1);
+  };
+
+
+  const deleteOrder = async () => {
+    if (!selectedOrderId) return;
+
+    try {
+      setDeleteLoading(true);
+
+      const res = await fetch(`/api/order/${selectedOrderId}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.message || "Delete failed");
+      }
+
+      // ลบสำเร็จ
+      setShowDeleteModal(false);
+      setSelectedOrderId(null);
+
+      await getOrder();
+
+    } catch (error) {
+      console.error("Delete order error:", error);
+
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
 
@@ -581,16 +617,27 @@ export default function OrdersPage() {
 
                         <div className="flex justify-end gap-2">
 
+                          <div
+                            onClick={() => {
+                              setSelectedOrderId(order.id);
+                              setShowDeleteModal(true);
+                            }}
+
+                            className="rounded-lg border border-red-500 px-4 py-2 text-red-500 hover:bg-red-500 hover:text-white">
+                            ลบ
+                          </div>
+
                           <button
                             type="button"
                             onClick={() => {
                               window.location.href =
                                 `/order/orderDetail/${order.id}`;
                             }}
-                            className="rounded-lg border border-gray-300 px-3 py-2 text-xs font-medium hover:bg-gray-50"
-                          >
+                            className="rounded-lg border border-gray-300 px-3 py-2 text-xs font-medium hover:bg-gray-50" >
                             ดู
+
                           </button>
+
 
                           {order.paymentType ===
                             "INSTALLMENT" && (
@@ -708,6 +755,24 @@ export default function OrdersPage() {
         </div>
 
       </div>
+
+
+
+      <ConfirmDeleteModal
+        open={showDeleteModal}
+        title="ยืนยันการลบ Order"
+        message="คุณต้องการลบ Order นี้ใช่หรือไม่? การลบนี้ไม่สามารถย้อนกลับได้"
+        confirmText="ยืนยันลบ"
+        cancelText="ยกเลิก"
+        loading={deleteLoading}
+        onConfirm={deleteOrder}
+        onCancel={() => {
+          if (!deleteLoading) {
+            setShowDeleteModal(false);
+            setSelectedOrderId(null);
+          }
+        }}
+      />
     </main>
   );
 }

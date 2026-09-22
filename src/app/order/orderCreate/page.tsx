@@ -105,21 +105,30 @@ export default function NewOrderPage() {
 
     const searchProducts = async () => {
         try {
-            const response = await fetch(
-                `/api/product?search=${encodeURIComponent(searchProduct)}`
-            );
 
-            if (!response.ok) {
-                throw new Error("โหลด Product ไม่สำเร็จ");
+
+            setProducts([]);
+
+            if (searchProduct.length > 3) {
+                const response = await fetch(
+                    `/api/product?search=${encodeURIComponent(searchProduct)}`
+                );
+
+                if (!response.ok) {
+                    throw new Error("โหลด Product ไม่สำเร็จ");
+                }
+                const data = await response.json();
+
+                const products = data.data.product_list.map((product) => ({
+                    ...product,
+                    quantity: 1,
+                }));
+
+                setProducts(data.data.product_list);
+            } else {
+                setProducts([]);
             }
-            const data = await response.json();
 
-            const products = data.data.product_list.map((product) => ({
-                ...product,
-                quantity: 1,
-            }));
-
-            setProducts(data.data.product_list);
         } catch (error) {
             console.error(error);
         }
@@ -133,6 +142,19 @@ export default function NewOrderPage() {
             0
         );
     }, [items]);
+
+    const totalCost = useMemo(() => {
+        return items.reduce((total, item) => {
+            return total +
+                (Number(item.price_cost) * Number(item.quantity));
+        }, 0);
+    }, [items]);
+
+
+    // const totalCost = productList.reduce((total, item) => {
+    //     return total +
+    //         (Number(item.product.price_cost) * Number(item.quantity));
+    // }, 0);
 
     const total = Math.max(subtotal - discount, 0);
 
@@ -237,6 +259,7 @@ export default function NewOrderPage() {
     ) => {
         event.preventDefault();
 
+      
         const orderData = {
             customerId,
             items: items.map((item) => ({
@@ -251,6 +274,7 @@ export default function NewOrderPage() {
             discount,
             total,
             paymentType,
+            totalCost,
         };
 
         // console.log("Order Data:", orderData);
@@ -258,7 +282,7 @@ export default function NewOrderPage() {
         // TODO:
         // ส่ง orderData ไป API
         //
-       const response =  await fetch("/api/order/order_insert", {
+        const response = await fetch("/api/order/order_insert", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -266,10 +290,10 @@ export default function NewOrderPage() {
             body: JSON.stringify(orderData),
         });
         const result = await response.json();
-         if (response.ok) {
+        if (response.ok) {
             alert('บันทึกสินค้าใน Order สำเร็จ');
-              window.location.href = '/order/orderList';
-         }
+            window.location.href = '/order/orderList';
+        }
 
     };
 
@@ -341,7 +365,7 @@ export default function NewOrderPage() {
                     </p>
                 </div>
 
-                <form >
+                <div >
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
                         {/* LEFT */}
@@ -836,7 +860,7 @@ export default function NewOrderPage() {
                         </aside>
 
                     </div>
-                </form>
+                </div>
             </div>
         </main>
     );

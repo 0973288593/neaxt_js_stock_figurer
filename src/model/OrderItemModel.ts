@@ -44,4 +44,15 @@ export class OrderItemModel {
         return records;
 
     }
+    async deleteOrderItem(id: string) {
+
+        const deleteItem = await prisma.OrderItem.deleteMany({
+            where: {
+                orderId: id
+            },
+        });
+
+        return deleteItem;
+
+    }
 }
