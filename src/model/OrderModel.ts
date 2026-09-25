@@ -19,7 +19,7 @@ export class OrderModel {
     async insert(data: Order) {
         const order = await prisma.Order.create({
             data: {
-                orderNumber: data.orderNumber.toString(),
+                orderNumber: data.orderNumber,
                 customer_id: data.customer_id,
                 status: data.status,
                 paymentStatus: 'PENDING',

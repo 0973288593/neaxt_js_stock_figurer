@@ -41,7 +41,7 @@ export async function POST(req: Request) {
   
     const data_img = {
       img_name: JSON.stringify(res.product_img) || '' ,
-      product_id: result.id
+      product_id: Number(result.id)
     }
 
     const imageModel = new ProductImageModel(); 

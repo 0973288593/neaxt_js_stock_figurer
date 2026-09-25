@@ -1,7 +1,14 @@
 import React from 'react'
 
-export const Account = () => {
+
+function Account() {
   return (
-    <div>Account</div>
-  )
+    <div>
+      Account
+    </div>
+  );
+}
+
+export default function Page() {
+  return <Account />;
 }

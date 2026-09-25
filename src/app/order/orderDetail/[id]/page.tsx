@@ -3,22 +3,28 @@
 import "../../../../../public/css/order-detail.css";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import tableOrderProductList from "../../../../components/table/"
+
 
 
 export default function orderDetail() {
     const router = useRouter();
     const params = useParams();
-    const [orderDetail, setOrderDetail] = useState({});
+    // const [orderDetail, setOrderDetail] = useState({});
     const [productList, setProductList] = useState([]);
     const [selectedImage, setSelectedImage] = useState(null);
+
+    const [orderDetail, setOrderDetail] = useState<OrderDetail | null>(null);
 
     const [statusEditshipCost, setStatusEditshipCost] = useState(false);
     const [shippingCost, setShippingCost] = useState(0);
     const [totalProductCost, setTotalProductCost] = useState(0);
 
 
-
+    interface OrderDetail {
+        id: string;
+        shipping_cost?: number;
+        // ... add other order fields
+    }
     const id = params.id;
 
 
@@ -38,7 +44,7 @@ export default function orderDetail() {
             setShippingCost(data.data.orderDetail.shippingCost)
 
 
-            const totalCost = productList.reduce((total, item) => {
+            const totalCost = productList.reduce((total: number, item: any) => {
                 return total +
                     (Number(item.product.price_cost) * Number(item.quantity));
             }, 0);
@@ -65,7 +71,7 @@ export default function orderDetail() {
                 },
                 body: JSON.stringify({
                     shippingCost: shippingCost,
-                    profit: orderDetail.profit 
+                    profit: orderDetail.profit
 
                 }),
             });

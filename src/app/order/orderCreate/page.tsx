@@ -11,6 +11,9 @@ type Product = {
     sku: string;
     price: number;
     stock: number;
+    price_cost: number;
+    image : string;
+    
 };
 
 type Customer = {
@@ -23,33 +26,11 @@ type Customer = {
 
 type OrderItem = Product & {
     quantity: number;
+    price_cost: number;
 };
 
 
 
-const mockProducts: Product[] = [
-    {
-        id: "p1",
-        name: "iPhone 17 Pro",
-        sku: "IPHONE-17-PRO",
-        price: 35000,
-        stock: 10,
-    },
-    {
-        id: "p2",
-        name: "iPhone Case",
-        sku: "CASE-001",
-        price: 1000,
-        stock: 20,
-    },
-    {
-        id: "p3",
-        name: "USB-C Charger",
-        sku: "CHARGER-001",
-        price: 1200,
-        stock: 15,
-    },
-];
 
 
 export default function NewOrderPage() {
@@ -119,7 +100,7 @@ export default function NewOrderPage() {
                 }
                 const data = await response.json();
 
-                const products = data.data.product_list.map((product) => ({
+                const products = data.data.product_list.map((product: any) => ({
                     ...product,
                     quantity: 1,
                 }));
@@ -150,6 +131,8 @@ export default function NewOrderPage() {
         }, 0);
     }, [items]);
 
+    
+
 
     // const totalCost = productList.reduce((total, item) => {
     //     return total +
@@ -174,7 +157,7 @@ export default function NewOrderPage() {
 
     const addProduct = (product: Product) => {
 
-        setItems((currentItems) => {
+        setItems((currentItems ) => {
             const existingItem = currentItems.find(
                 (item) => item.id === product.id
             );
@@ -845,7 +828,8 @@ export default function NewOrderPage() {
                                     </button>
 
                                     <button
-                                        onClick={handleSubmitCreate}
+                                      
+                                        onClick={(e) => handleSubmitCreate(e as unknown as React.FormEvent<HTMLFormElement>)}
                                         disabled={
                                             !customerId ||
                                             items.length === 0

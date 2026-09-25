@@ -24,7 +24,7 @@ export async function POST(req: Request) {
         const now = new Date();
 
         const data_order_insrert = {
-            orderNumber: orderNumber,
+            orderNumber: String(orderNumber),
             customer_id: parseInt(res.customerId),
             status: res.paymentType,
             paymentStatus: '',
@@ -43,8 +43,8 @@ export async function POST(req: Request) {
             note: '',
             totalCost: res.totalCost,
             profit: res.subtotal - res.totalCost,
-            createdAt: now.toISOString(),
-            updatedAt: now.toISOString(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
         }
 
       
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
                     quantity: element.quantity,
                     unitPrice: element.price,
                     totalPrice: element.subtotal,
-                    createdAt: now.toISOString(),
+                    createdAt: new Date(),
                 };
                 //console.log(data_order_item)
                 const result_sdd_order_item = await orderItemModel.insert(data_order_item);
