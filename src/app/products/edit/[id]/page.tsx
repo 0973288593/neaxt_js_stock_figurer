@@ -7,6 +7,17 @@ import { useCallback } from "react";
 
 // src\app\globals.css
 
+interface ProductFormData {
+  product_name: string;
+  description: string;
+  product_cost: number;
+  product_sku: string;
+  product_price: number;
+  Stock: number;
+  product_img: string;
+  images: string[]; // ระบุว่าเป็น string[] แทนที่จะปล่อยให้เป็น never[]
+}
+
 
 export default function EditProduct() {
   const router = useRouter();
@@ -17,7 +28,8 @@ export default function EditProduct() {
   const [loading, setLoading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
 
-  const [formData, setFormData] = useState({
+  // ตอนประกาศ useState
+  const [formData, setFormData] = useState<ProductFormData>({
     product_name: "",
     description: "",
     product_cost: 0,
@@ -25,7 +37,7 @@ export default function EditProduct() {
     product_price: 0,
     Stock: 0,
     product_img: "",
-    images: [],
+    images: [], // TypeScript จะเข้าใจแล้วว่าเป็น string[] ที่ยังไม่มีข้อมูล
   });
 
   // โหลดข้อมูลเดิม

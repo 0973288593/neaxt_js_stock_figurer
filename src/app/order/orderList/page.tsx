@@ -9,7 +9,9 @@ type OrderStatus =
   | "CONFIRMED"
   | "PROCESSING"
   | "COMPLETED"
-  | "CANCELLED";
+  | "CANCELLED"
+  | "INSTALLMENT";
+
 
 type PaymentType = "FULL" | "INSTALLMENT";
 
@@ -23,65 +25,11 @@ type Order = {
   status: OrderStatus;
   paymentType: PaymentType;
   createdAt: string;
+  paymentStatus: OrderStatus;
+  orderNumber: number;
 };
 
-const mockOrders: Order[] = [
-  {
-    id: "1",
-    orderNo: "ORD-00001",
-    customerName: "สมชาย ใจดี",
-    customerPhone: "081-111-1111",
-    itemCount: 2,
-    total: 35000,
-    status: "CONFIRMED",
-    paymentType: "INSTALLMENT",
-    createdAt: "2026-08-16",
-  },
-  {
-    id: "2",
-    orderNo: "ORD-00002",
-    customerName: "สมหญิง ใจดี",
-    customerPhone: "082-222-2222",
-    itemCount: 1,
-    total: 12500,
-    status: "COMPLETED",
-    paymentType: "FULL",
-    createdAt: "2026-08-15",
-  },
-  {
-    id: "3",
-    orderNo: "ORD-00003",
-    customerName: "John Smith",
-    customerPhone: "089-333-3333",
-    itemCount: 3,
-    total: 8900,
-    status: "PENDING",
-    paymentType: "INSTALLMENT",
-    createdAt: "2026-08-14",
-  },
-  {
-    id: "4",
-    orderNo: "ORD-00004",
-    customerName: "วิชัย พัฒนกิจ",
-    customerPhone: "086-444-4444",
-    itemCount: 2,
-    total: 22000,
-    status: "PROCESSING",
-    paymentType: "FULL",
-    createdAt: "2026-08-13",
-  },
-  {
-    id: "5",
-    orderNo: "ORD-00005",
-    customerName: "นิดา ใจดี",
-    customerPhone: "085-555-5555",
-    itemCount: 1,
-    total: 4500,
-    status: "CANCELLED",
-    paymentType: "FULL",
-    createdAt: "2026-08-12",
-  },
-];
+
 
 const statusConfig: Record<
   OrderStatus,
@@ -115,6 +63,11 @@ const statusConfig: Record<
     className:
       "bg-red-100 text-red-700",
   },
+  INSTALLMENT: {
+    label: "ผ่อน",
+    className:
+      "bg-red-100 text-red-700",
+  }
 };
 
 export default function OrdersPage() {
@@ -131,7 +84,8 @@ export default function OrdersPage() {
   const [currentPage, setCurrentPage] = useState(1);
 
 
-  const [orderList, setOrderList] = useState([]);
+
+  const [orderList, setOrderList] = useState<Order[]>([]);
   const [orderCount, setOrderCount] = useState('');
   const [orderTotal, setOrderTotal] = useState('');
   const [pagination, setPagination] = useState({});
@@ -156,7 +110,7 @@ export default function OrdersPage() {
     const data = await res.json();
 
     const totalOrder = data.data.order_list.reduce(
-      (sum, order) => sum + Number(order.total),
+      (sum: any, order: any) => sum + Number(order.total),
       0
     );
     setOrderTotal(totalOrder)
@@ -188,31 +142,33 @@ export default function OrdersPage() {
       .trim()
       .toLowerCase();
 
-    return mockOrders.filter((order) => {
-      const matchSearch =
-        !keyword ||
-        order.orderNo
-          .toLowerCase()
-          .includes(keyword) ||
-        order.customerName
-          .toLowerCase()
-          .includes(keyword) ||
-        order.customerPhone.includes(keyword);
+    return orderList
 
-      const matchStatus =
-        status === "ALL" ||
-        order.status === status;
+    // return orderList.filter((order) => {
+    //   const matchSearch =
+    //     !keyword ||
+    //     order.orderNo
+    //       .toLowerCase()
+    //       .includes(keyword) ||
+    //     order.customerName
+    //       .toLowerCase()
+    //       .includes(keyword) ||
+    //     order.customerPhone.includes(keyword);
 
-      const matchPayment =
-        paymentType === "ALL" ||
-        order.paymentType === paymentType;
+    //   const matchStatus =
+    //     status === "ALL" ||
+    //     order.status === status;
 
-      return (
-        matchSearch &&
-        matchStatus &&
-        matchPayment
-      );
-    });
+    //   const matchPayment =
+    //     paymentType === "ALL" ||
+    //     order.paymentType === paymentType;
+
+    //   return (
+    //     matchSearch &&
+    //     matchStatus &&
+    //     matchPayment
+    //   );
+    // });
   }, [search, status, paymentType]);
 
   const totalPages = Math.ceil(
@@ -225,7 +181,7 @@ export default function OrdersPage() {
   );
 
   const totalOrderAmount = filteredOrders.reduce(
-    (sum, order) => sum + order.total,
+    (sum, order) => sum + Number(order.total),
     0
   );
 
@@ -323,7 +279,7 @@ export default function OrdersPage() {
             </p>
 
             <p className="mt-2 text-2xl font-bold text-blue-600">
-              ฿{formatMoney(orderTotal)}
+              ฿{formatMoney(Number(orderTotal))}
             </p>
           </div>
 
@@ -533,6 +489,7 @@ export default function OrdersPage() {
                   const statusInfo =
                     statusConfig[
                     order.paymentStatus
+
                     ];
 
                   return (
@@ -551,7 +508,7 @@ export default function OrdersPage() {
                           }}
                           className="font-semibold text-blue-600 hover:text-blue-700"
                         >
-                          {order.orderNumber}
+                          {order?.orderNumber}
                         </button>
                       </td>
 
@@ -583,8 +540,7 @@ export default function OrdersPage() {
                       {/* Payment */}
                       <td className="px-6 py-4 text-center">
 
-                        {order.status ===
-                          "INSTALLMENT" ? (
+                        {order.status === "INSTALLMENT" ? (
                           <span className="inline-flex rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700">
                             มัดจำ / ผ่อน
                           </span>

@@ -4,9 +4,11 @@ export type Order = {
     orderNumber: string;
     customer_id: number;
     paymentStatus: string;
-    status: string;
+    status?: OrderStatus;
     subtotal: number;
     discount: number;
+    totalCost: number;
+    profit:number;
     total: number;
     customerName: string;
     customerPhone: string;
@@ -14,10 +16,18 @@ export type Order = {
     updatedAt: Date;
 };
 
+export type OrderStatus =
+    | "PENDING"
+    | "CONFIRMED"
+    | "PROCESSING"
+    | "SHIPPED"
+    | "DELIVERED"
+    | "CANCELLED";
+
 export class OrderModel {
 
     async insert(data: Order) {
-        const order = await prisma.Order.create({
+        const order = await prisma.order.create({
             data: {
                 orderNumber: data.orderNumber,
                 customer_id: data.customer_id,
@@ -49,8 +59,8 @@ export class OrderModel {
         return order.id;
     }
 
-    async getAll(page, limit, search) {
-        return await prisma.Order.findMany({
+    async getAll(page: number, limit: number, search: string) {
+        return await prisma.order.findMany({
             skip: page,
             take: limit,
             where: search
@@ -59,13 +69,11 @@ export class OrderModel {
                         {
                             orderNumber: {
                                 contains: search,
-                                mode: "insensitive",
                             },
                         },
                         {
                             customerName: {
                                 contains: search,
-                                mode: "insensitive",
                             },
                         }
                     ],
@@ -78,9 +86,9 @@ export class OrderModel {
         });
     }
 
-    async getCountAll(search) {
+    async getCountAll() {
 
-        const count = await prisma.Order.count();
+        const count = await prisma.order.count();
         // console.log("COUNT:", count, typeof count);
         //return await prisma.product.count();
 
@@ -88,7 +96,7 @@ export class OrderModel {
     }
 
     async getById(id: string) {
-        const record = await prisma.Order.findUnique({
+        const record = await prisma.order.findUnique({
             where: {
                 id: id
             }
@@ -99,7 +107,7 @@ export class OrderModel {
 
 
     async updateOrder(id: string, data: object) {
-        return await prisma.Order.updateMany({
+        return await prisma.order.updateMany({
             where: {
                 id: id,
             },
@@ -109,7 +117,7 @@ export class OrderModel {
 
     async deleteOrder(id: string) {
 
-        return await prisma.Order.delete({
+        return await prisma.order.delete({
             where: {
                 id: id
             },

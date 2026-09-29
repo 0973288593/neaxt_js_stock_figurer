@@ -5,6 +5,7 @@ import FileUpload from "../../ui/Dropzone"
 import { redirect } from "next/dist/server/api-utils";
 
 
+
 export default function createProduct() {
   const [formData, setFormData] = useState({
     product_name: "",
@@ -13,7 +14,7 @@ export default function createProduct() {
     product_sku: "",
     product_price: 0,
     Stock: 0,
-    product_img:""
+    product_img: ""
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -23,11 +24,11 @@ export default function createProduct() {
   // เมื่อ uploadedFiles เปลี่ยน, ดึงรูปแรกมาใส่ใน formData.product_img
   useEffect(() => {
 
-    
+
     if (uploadedFiles.length > 0) {
       setFormData((prevFormData) => ({
         ...prevFormData,
-        product_img: ""+uploadedFiles +"" // หรือเลือก index อื่นตามต้องการ
+        product_img: "" + uploadedFiles + "" // หรือเลือก index อื่นตามต้องการ
       }));
     }
   }, [uploadedFiles]);
@@ -40,7 +41,7 @@ export default function createProduct() {
       [name]: value,
     }));
   };
-  
+
 
   //  const handleDrop = (acceptedFiles: File[]) => {
   //    setFormData({ ...formData, product_img: acceptedFiles });
@@ -114,7 +115,16 @@ export default function createProduct() {
           </div>
           <div>
             <div className="h-auto mb-5">
-              <FileUpload onFileUpload={setUploadedFiles}></FileUpload>
+              <FileUpload onFileUpload={(updater) => {
+                if (typeof updater === "string") {
+                  // ถ้าส่งมาเป็น string เดี่ยว ให้แปลงเป็น array
+                  setUploadedFiles([updater]);
+                } else if (typeof updater === "function") {
+                  setUploadedFiles(updater);
+                } else {
+                  setUploadedFiles(updater);
+                }
+              }}></FileUpload>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -183,16 +193,16 @@ export default function createProduct() {
                   <span className="me-3">
                     Product sku
                   </span>
-                  
+
                   <button
                     type="button"
                     onClick={generateSKU}
                     className="px-4 py-2 bg-green-500 text-white rounded"
                   >
                     Random
-                </button>
+                  </button>
                 </label>
-            
+
                 <input
                   type="text"
                   id="product_sku"

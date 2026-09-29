@@ -9,7 +9,7 @@ export type customer = {
 
 class Customer {
   async insert(data: customer) {
-    return prisma.Customer.create({
+    return prisma.customer.create({
       data: {
         name: data.name,
         lineAccount: data.lineAccount,
@@ -21,9 +21,9 @@ class Customer {
 
 
   // ✅ GET ALL
-  async getAll(page, limit) {
+  async getAll(page : number, limit : number) {
 
-    return await prisma.Customer.findMany({
+    return await prisma.customer.findMany({
       skip: page,
       take: limit,
       // orderBy: {
@@ -32,7 +32,7 @@ class Customer {
     });
   }
   async getCountAll() {
-    const count = await prisma.Customer.count();
+    const count = await prisma.customer.count();
     // console.log("COUNT:", count, typeof count);
     //return await prisma.product.count();
     return count;
@@ -40,7 +40,7 @@ class Customer {
 
   async getCustomerById(id: number) {
 
-    return await prisma.Customer.findUnique({
+    return await prisma.customer.findUnique({
       where: { id: id }, 
     });
   }

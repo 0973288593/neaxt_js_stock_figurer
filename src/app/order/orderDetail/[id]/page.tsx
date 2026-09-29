@@ -7,11 +7,42 @@ import { useParams, useRouter } from "next/navigation";
 
 
 export default function orderDetail() {
+
+    interface OrderDetail {
+        id: string;
+        shipping_cost?: number;
+        profit: number;
+        orderNumber: number;
+        customerName:string;
+        customerPhone:string;
+        subtotal:number;
+        shippingCost:number;
+        total:number;
+        
+        // ... add other order fields
+    }
+    interface ProductItem {
+        id: string;
+        productId: string;
+        productName: string;
+        productSku: string;
+        quantity: number;
+        unitPrice: number;
+        totalPrice: number;
+        customerName: string;
+        orderNumber: string;
+        product: {
+            name: string;
+            image: string;
+        };
+    }
     const router = useRouter();
     const params = useParams();
     // const [orderDetail, setOrderDetail] = useState({});
-    const [productList, setProductList] = useState([]);
-    const [selectedImage, setSelectedImage] = useState(null);
+
+
+    const [productList, setProductList] = useState<ProductItem[]>([]);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
     const [orderDetail, setOrderDetail] = useState<OrderDetail | null>(null);
 
@@ -20,11 +51,7 @@ export default function orderDetail() {
     const [totalProductCost, setTotalProductCost] = useState(0);
 
 
-    interface OrderDetail {
-        id: string;
-        shipping_cost?: number;
-        // ... add other order fields
-    }
+
     const id = params.id;
 
 
@@ -64,28 +91,31 @@ export default function orderDetail() {
 
     const updateShippingCost = async () => {
         try {
-            const response = await fetch(`/api/order/${orderDetail.id}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    shippingCost: shippingCost,
-                    profit: orderDetail.profit
+            if (orderDetail) {
+                const response = await fetch(`/api/order/${orderDetail.id}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        shippingCost: shippingCost,
+                        profit: orderDetail.profit
 
-                }),
-            });
+                    }),
+                });
 
-            if (!response.ok) {
-                throw new Error("Update shipping cost failed");
+                if (!response.ok) {
+                    throw new Error("Update shipping cost failed");
+                }
+
+                const result = await response.json();
+
+                await loadOrderDetail();
+
+                // ปิดโหมดแก้ไข
+                setStatusEditshipCost(false);
             }
 
-            const result = await response.json();
-
-            await loadOrderDetail();
-
-            // ปิดโหมดแก้ไข
-            setStatusEditshipCost(false);
 
         } catch (error) {
             console.error("Error:", error);
@@ -119,7 +149,7 @@ export default function orderDetail() {
                                 <div className="card-title">
 
                                     <h2>
-                                        Order #{orderDetail.orderNumber}
+                                        Order # {orderDetail?.orderNumber}
                                     </h2>
 
                                     <button className="invoice-btn">
@@ -215,7 +245,7 @@ export default function orderDetail() {
 
                                     <div className="info-row">
                                         <span>FULL NAME</span>
-                                        <strong className="text-black">{orderDetail.customerName}</strong>
+                                        <strong className="text-black">{orderDetail?.customerName}</strong>
                                     </div>
 
                                     <div className="info-row">
@@ -228,7 +258,7 @@ export default function orderDetail() {
                                     <div className="info-row">
                                         <span>PHONE NUMBER</span>
                                         <strong>
-                                            {orderDetail.customerPhone}
+                                            {orderDetail?.customerPhone}
                                         </strong>
                                     </div>
 
@@ -321,7 +351,7 @@ export default function orderDetail() {
 
                                 <div className="summary-row">
                                     <span>SUB TOTAL :</span>
-                                    <strong>${orderDetail.subtotal}</strong>
+                                    <strong>${orderDetail?.subtotal}</strong>
                                 </div>
 
                                 <div className="summary-row">
@@ -341,7 +371,7 @@ export default function orderDetail() {
                                             </span>
 
                                             <span>
-                                                $ {orderDetail.shippingCost}
+                                                $ {orderDetail?.shippingCost}
                                             </span>
                                         </div>
                                     ) : (
@@ -369,11 +399,11 @@ export default function orderDetail() {
 
                                 <div className="summary-row total-row">
                                     <span>TOTAL :</span>
-                                    <strong>${orderDetail.total}</strong>
+                                    <strong>${orderDetail?.total}</strong>
                                 </div>
                                 <div className="summary-row total-row">
                                     <span>Sales Profit :</span>
-                                    <strong>${(orderDetail.profit - orderDetail.shippingCost)}</strong>
+                                    <strong>${(Number(orderDetail?.profit ?? 0) - Number(orderDetail?.shippingCost ?? 0)).toFixed(2) }</strong>
                                 </div>
 
 

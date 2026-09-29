@@ -14,7 +14,7 @@ export type OrderItem = {
 export class OrderItemModel {
 
     async insert(data: OrderItem) {
-        const orderItem = prisma.OrderItem.create({
+        const orderItem = prisma.orderItem.create({
             data: {
                 orderId: data.orderId,
                 productId: data.productId,
@@ -32,7 +32,7 @@ export class OrderItemModel {
 
     async getOrderProduct(id: string) {
 
-        const records = await prisma.OrderItem.findMany({
+        const records = await prisma.orderItem.findMany({
             include: {
                 product: true,
             },
@@ -46,7 +46,7 @@ export class OrderItemModel {
     }
     async deleteOrderItem(id: string) {
 
-        const deleteItem = await prisma.OrderItem.deleteMany({
+        const deleteItem = await prisma.orderItem.deleteMany({
             where: {
                 orderId: id
             },

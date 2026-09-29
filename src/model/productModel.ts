@@ -64,7 +64,7 @@ export class ProductModel {
   //     },
   //   });
   // }
-  async getAll(page, limit, search) {
+  async getAll(page :any, limit: any, search:any) {
     return await prisma.product.findMany({
       skip: page,
       take: limit,
@@ -92,7 +92,7 @@ export class ProductModel {
     });
   }
 
-  async getCountAll(search) {
+  async getCountAll(search :string) {
 
     const count = await prisma.product.count();
     // console.log("COUNT:", count, typeof count);

@@ -1,7 +1,55 @@
 "use client";
 
-export default function table_order({ items , pagination }) {
+import { useState } from "react";
 
+interface TableOrderProps {
+    items: any[]; // สามารถเปลี่ยน any เป็น Type ของ Order Item ของคุณได้ เช่น OrderItem[]
+    pagination?: any; // หรือระบุ Type ของ pagination เช่น { page: number; totalPage: number }
+}
+
+
+const statusConfig: Record<string, { label: string; className: string }> = {
+    pending: { label: "รอดำเนินการ", className: "bg-yellow-100 text-yellow-800" },
+    completed: { label: "สำเร็จ", className: "bg-green-100 text-green-800" },
+    cancelled: { label: "ยกเลิก", className: "bg-red-100 text-red-800" },
+};
+
+interface TableOrderProps {
+    items: any[];
+    pagination?: any;
+    currentPage?: number;
+    onPageChange?: (page: number) => void; // ฟังก์ชันเปลี่ยนหน้า
+}
+
+
+
+const formatMoney = (value: number) => {
+    return new Intl.NumberFormat("th-TH", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(value);
+};
+const formatDate = (dateString: string | Date) => {
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleDateString("th-TH", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+    });
+};
+
+
+export default function table_order({ items, pagination }: TableOrderProps) {
+
+    const paginatedOrders = items || [];
+    const totalPages = pagination?.totalPages || pagination?.total_pages || 0;
+    //const currentPage = pagination?.currentPage || pagination?.currentPage || 0;
+    const itemsPerPage = pagination?.itemsPerPage || pagination?.itemsPerPage || 0;
+    
+    const filteredOrders = items || [];
+
+
+    const [currentPage, setCurrentPage] = useState(1);
     <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
 
         <div className="overflow-x-auto">
@@ -96,7 +144,7 @@ export default function table_order({ items , pagination }) {
                                 {/* Total */}
                                 <td className="px-6 py-4 text-right">
                                     <span className="font-semibold">
-                                        ฿{formatMoney(order.total)}
+                                        ฿{formatMoney(Number(order.total))}
                                     </span>
                                 </td>
 

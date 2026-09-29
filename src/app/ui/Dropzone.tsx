@@ -57,7 +57,7 @@ const DropzoneComponent = ({
       dictDefaultMessage:
         "ลากและวางไฟล์ที่นี่ หรือคลิกเพื่ออัปโหลด",
 
-      params: function (files, xhr, chunk) {
+      params: function (files :any , xhr :any, chunk : any) {
         return {
           name: `file_${Date.now()}`,
           dzuuid: chunk
@@ -74,7 +74,7 @@ const DropzoneComponent = ({
      * Upload สำเร็จ
      * ================================
      */
-    dz.on("success", (file, response) => {
+    dz.on("success", (file :DropzoneFile, response :any) => {
       console.log("UPLOAD SUCCESS");
       console.log("response:", response);
 
@@ -120,7 +120,7 @@ const DropzoneComponent = ({
     //     prev.filter((name) => name !== file.name)
     //   );
     // });
-    dz.on("removedfile", (file) => {
+    dz.on("removedfile", (file : DropzoneFile) => {
       if (isDestroyingRef.current) {
         console.log(
           "IGNORE removedfile because Dropzone is destroying"
@@ -189,7 +189,7 @@ const DropzoneComponent = ({
         serverFileName: image,
       };
 
-      dzRef.current.displayExistingFile(
+      dzRef.current?.displayExistingFile(
         mockFile,
         `/uploads/product/${image}`
       );

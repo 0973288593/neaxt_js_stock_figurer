@@ -5,10 +5,19 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import Link from "next/link";
 
+interface PaginationInfo {
+  totalPages?: number;
+  currentPage?: number;
+  total?: number;
+}
+
+
+const [pagination, setPagination] = useState<PaginationInfo>({ currentPage: 1, totalPages: 1 });
+
 
 export default function TablePage() {
   const router = useRouter();
-  const searchParams  = useSearchParams();
+  const searchParams = useSearchParams();
 
   const currentPage = Number(searchParams.get("page")) || 1;
 
@@ -21,25 +30,25 @@ export default function TablePage() {
 
     console.log(currentPage)
 
-   
-    
+
+
     const res = await fetch(
       `/api/product?page=${currentPage}&limit=${limit}`
     );
     const data = await res.json();
-   
+
     setUsers(data.data.product_list);
-    
+
     setPagination(data.data.pagination);
   };
 
-  
+
 
   useEffect(() => {
     loadData();
   }, [currentPage, limit])
 
-  const formatDate = (date) => {
+  const formatDate = (date: any) => {
     return new Date(date).toLocaleString("th-TH", {
       timeZone: "Asia/Bangkok",
       year: "numeric",
@@ -50,7 +59,7 @@ export default function TablePage() {
     });
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: string) => {
     try {
       const response = await fetch(`/api/product/delete_product/${id}`, {
         method: 'DELETE',
@@ -67,12 +76,13 @@ export default function TablePage() {
       console.error("Error calling delete API:", error);
     }
   };
-  const onPageChange = async(page) => {
+  const onPageChange = async (page: any) => {
     console.log(page)
     // setCurrentPage(page);
     router.push(`?page=${page}`);
-   loadData();
+    loadData();
   };
+
 
   // console.log(users)
 
@@ -89,7 +99,7 @@ export default function TablePage() {
             <th className="border p-2">price</th>
             <th className="border p-2">price cost</th>
             <th className="border p-2">created</th>
-            <th className="border p-2" style={{'width': '203px'}}>action</th>
+            <th className="border p-2" style={{ 'width': '203px' }}>action</th>
 
           </tr>
         </thead>
@@ -97,8 +107,8 @@ export default function TablePage() {
           {products.map((product) => (
             <tr key={product.id} className="hover:bg-gray-100">
               <td className="flex items-center border">
-                <div className="text-white flex items-center  p-3 " style={{ width:'100%' }}>
-                  <img style={{ width:'50px', height:'50px'  }} src={`/uploads/product/${product.image}`} alt={product.name} />
+                <div className="text-white flex items-center  p-3 " style={{ width: '100%' }}>
+                  <img style={{ width: '50px', height: '50px' }} src={`/uploads/product/${product.image}`} alt={product.name} />
                 </div>
               </td>
               <td className="border p-2">
@@ -127,31 +137,30 @@ export default function TablePage() {
           ))}
         </tbody>
       </table>
-   
 
-  
-      <div className="mt-3"  style={{ display: "flex", gap: "8px" }}>
-      {[...Array(pagination.totalPages)].map((_, index) => {
-        const page = index + 1;
 
-        return (
-          <button
-            key={page}
-            onClick={() => onPageChange(page)}
-            style={{
-              padding: "8px 12px",
-              backgroundColor:
-                pagination.currentPage === page ? "black" : "#ddd",
-              color: pagination.currentPage === page ? "white" : "black",
-              border: "none",
-              borderRadius: "6px",
-            }}
-          >
-            {page}
-          </button>
-        );
-      })}
-    </div>
+
+      <div className="mt-3" style={{ display: "flex", gap: "8px" }}>
+        {[...Array((pagination as any)?.totalPages || 0)].map((_, index) => {
+          const page = index + 1;
+
+          return (
+            <button
+              key={page}
+              onClick={() => onPageChange(page)}
+              style={{
+                padding: "8px 12px",
+                backgroundColor: (pagination as any)?.currentPage === page ? "black" : "#ddd",
+               color: (pagination as any)?.currentPage === page ? "white" : "black",
+                border: "none",
+                borderRadius: "6px",
+              }}
+            >
+              {page}
+            </button>
+          );
+        })}
+      </div>
 
     </div>
   );

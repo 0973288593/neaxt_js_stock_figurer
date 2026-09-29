@@ -17,8 +17,8 @@ export async function GET(req: Request) {
         const orderModel = new OrderModel();
 
 
-        const OrderList = await orderModel.getAll(skip, limit, search);
-        const count_order = await orderModel.getCountAll(search);
+        const OrderList = await orderModel.getAll(skip, limit, String(search)  );
+        const count_order = await orderModel.getCountAll();
         const totalPages = Math.ceil(count_order / limit);
 
         const pagination = {
