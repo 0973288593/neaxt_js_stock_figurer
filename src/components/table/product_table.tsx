@@ -12,7 +12,7 @@ interface PaginationInfo {
 }
 
 
-const [pagination, setPagination] = useState<PaginationInfo>({ currentPage: 1, totalPages: 1 });
+
 
 
 export default function TablePage() {
@@ -24,7 +24,8 @@ export default function TablePage() {
   console.log(currentPage)
   const limit = 10
   const [products, setUsers] = useState<any[]>([]);
-  const [pagination, setPagination] = useState({});
+
+  const [pagination, setPagination] = useState<PaginationInfo>({ currentPage: 1, totalPages: 1 });
 
   const loadData = async () => {
 
