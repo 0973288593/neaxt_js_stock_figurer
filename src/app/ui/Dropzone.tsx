@@ -195,7 +195,7 @@ const DropzoneComponent = ({
 
       dzRef.current?.displayExistingFile(
         mockFile,
-        `/uploads/product/${image}`
+        process.env.NEXT_PUBLIC_DOMAIN_IMAGE+`storage/v1/object/public/product/${image}`
       );
     });
   }, [existingImages]);
