@@ -66,7 +66,7 @@ export default function createProduct() {
       if (response.ok) {
         console.log(result);
         setMessage("บันทึกข้อมูลสำเร็จ!");
-        window.location.href = "/products";
+        // window.location.href = "/products";
         // setFormData({ name: "", email: "" });
       } else {
         setMessage(result.error || "เกิดข้อผิดพลาด");
@@ -115,7 +115,18 @@ export default function createProduct() {
           </div>
           <div>
             <div className="h-auto mb-5">
-              <FileUpload onFileUpload={(updater) => {
+             {/* <FileUpload onFileUpload={setUploadedFiles}></FileUpload> */}
+
+              <FileUpload
+                existingImages={uploadedFiles}
+                onFileUpload={(updater: any) => {
+                  // โยน updater ให้ setUploadedFiles โดยตรงได้เลย React จะจัดการแยกประเภทให้อัตโนมัติ
+                  console.log(updater)
+                  setUploadedFiles(updater);
+                }}
+              />
+
+              {/* <FileUpload onFileUpload={(updater) => {
                 if (typeof updater === "string") {
                   // ถ้าส่งมาเป็น string เดี่ยว ให้แปลงเป็น array
                   setUploadedFiles([updater]);
@@ -124,7 +135,7 @@ export default function createProduct() {
                 } else {
                   setUploadedFiles(updater);
                 }
-              }}></FileUpload>
+              }}></FileUpload> */}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">

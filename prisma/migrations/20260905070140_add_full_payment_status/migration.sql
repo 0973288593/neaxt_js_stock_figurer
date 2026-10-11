@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE `Order` MODIFY `paymentStatus` ENUM('PENDING', 'PAID', 'FAILED', 'REFUNDED', 'FULL') NOT NULL DEFAULT 'PENDING';

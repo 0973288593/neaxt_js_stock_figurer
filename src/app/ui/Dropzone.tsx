@@ -37,6 +37,7 @@ const DropzoneComponent = ({
    * สร้าง Dropzone
    */
   useEffect(() => {
+    
     if (!onFileUpload) return;
     if (!dropzoneRef.current) return;
     if (dzRef.current) return;
@@ -57,7 +58,7 @@ const DropzoneComponent = ({
       dictDefaultMessage:
         "ลากและวางไฟล์ที่นี่ หรือคลิกเพื่ออัปโหลด",
 
-      params: function (files :any , xhr :any, chunk : any) {
+      params: function (files: any, xhr: any, chunk: any) {
         return {
           name: `file_${Date.now()}`,
           dzuuid: chunk
@@ -74,7 +75,7 @@ const DropzoneComponent = ({
      * Upload สำเร็จ
      * ================================
      */
-    dz.on("success", (file :DropzoneFile, response :any) => {
+    dz.on("success", (file: DropzoneFile, response: any) => {
       console.log("UPLOAD SUCCESS");
       console.log("response:", response);
 
@@ -120,7 +121,7 @@ const DropzoneComponent = ({
     //     prev.filter((name) => name !== file.name)
     //   );
     // });
-    dz.on("removedfile", (file : DropzoneFile) => {
+    dz.on("removedfile", (file: DropzoneFile) => {
       if (isDestroyingRef.current) {
         console.log(
           "IGNORE removedfile because Dropzone is destroying"
@@ -165,13 +166,14 @@ const DropzoneComponent = ({
 
       dzRef.current = null;
     };
-  }, [onFileUpload]);
+    
+  }, []);
 
-  /**
-   * ================================
-   * แสดงรูปเดิม
-   * ================================
-   */
+  // /**
+  //  * ================================
+  //  * แสดงรูปเดิม
+  //  * ================================
+  //  */
   const existingImagesLoadedRef = useRef(false);
   useEffect(() => {
     if (!dzRef.current) return;
@@ -180,6 +182,8 @@ const DropzoneComponent = ({
     if (existingImagesLoadedRef.current) return;
 
     existingImagesLoadedRef.current = true;
+
+    
 
     existingImages.forEach((image) => {
       const mockFile = {
