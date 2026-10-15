@@ -117,7 +117,7 @@ export async function POST(request: Request) {
 
     // Production: เก็บใน Supabase Storage
     const supabaseUrl = process.env.SUPABASE_URL;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const serviceKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !serviceKey) {
       return NextResponse.json(
