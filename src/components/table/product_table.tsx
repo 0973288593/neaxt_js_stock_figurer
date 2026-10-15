@@ -109,9 +109,8 @@ export default function TablePage() {
             <tr key={product.id} className="hover:bg-gray-100">
               <td className="flex items-center border">
                 <div className="text-white flex items-center  p-3 " style={{ width: '100%' }}>
-                  <img style={{ width: '90px', height: '90px' }}  src={`${process.env.NEXT_PUBLIC_DOMAIN_IMAGE}storage/v1/object/public/product/${product.image}`}
+                  <img style={{ width: '90px', height: '90px' }}  src={`${process.env.NEXT_PUBLIC_DOMAIN_IMAGE}product/${product.image}`}
                     alt={product.name}/>
-
                 </div>
               </td>
               <td className="border p-2">
