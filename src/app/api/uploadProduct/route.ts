@@ -61,6 +61,7 @@ import { createClient } from "@supabase/supabase-js";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
+import { supabase } from "@/lib/supabase";
 
 export const runtime = "nodejs";
 
@@ -109,24 +110,24 @@ export async function POST(request: Request) {
       // return NextResponse.json({
       //   image: `/uploads/product/${filename}`,
       // });
-       return NextResponse.json({
+      return NextResponse.json({
         message: "Upload successful",
         name: filename,
       });
     }
 
     // Production: เก็บใน Supabase Storage
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const serviceKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    // const supabaseUrl = process.env.SUPABASE_URL;
+    // const serviceKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-    if (!supabaseUrl || !serviceKey) {
-      return NextResponse.json(
-        { error: "Missing Supabase server configuration" },
-        { status: 500 }
-      );
-    }
+    // if (!supabaseUrl || !serviceKey) {
+    //   return NextResponse.json(
+    //     { error: "Missing Supabase server configuration" },
+    //     { status: 500 }
+    //   );
+    // }
 
-    const supabase = createClient(supabaseUrl, serviceKey);
+    // const supabase = createClient(supabaseUrl, serviceKey);
 
     const { error } = await supabase.storage
       .from("product")
@@ -144,8 +145,12 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({
-      image: filename,
+      message: "Upload successful",
+      name: filename,
     });
+
+
+
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json(
