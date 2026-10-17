@@ -48,11 +48,11 @@ const DropzoneComponent = ({
 
     Dropzone.options.myDropzone = {
       init: function () {
-        this.on("thumbnail", function (file : any, dataUrl : any) {
+        this.on("thumbnail", function (file: any, dataUrl: any) {
           console.log("สร้าง thumbnail แล้ว", file.name);
         });
 
-        this.on("error", function (file :any, message :any) {
+        this.on("error", function (file: any, message: any) {
           console.error("Upload error:", message);
         });
       }
@@ -195,6 +195,8 @@ const DropzoneComponent = ({
 
     existingImagesLoadedRef.current = true;
 
+     const dz = dzRef.current;
+
 
 
     existingImages.forEach((image) => {
@@ -207,10 +209,23 @@ const DropzoneComponent = ({
         crossOrigin: "anonymous"
       };
 
-      dzRef.current?.displayExistingFile(
+      // dzRef.current?.displayExistingFile(
+      //   mockFile,
+      //   `${process.env.NEXT_PUBLIC_DOMAIN_IMAGE}product/${image}`
+      // );
+      const imageUrl =
+        `${process.env.NEXT_PUBLIC_DOMAIN_IMAGE}product/${image}`;
+
+      dz.displayExistingFile(
         mockFile,
-        `${process.env.NEXT_PUBLIC_DOMAIN_IMAGE}product/${image}`
+        imageUrl,
+        undefined,
+        undefined,
+        false
       );
+
+
+
     });
   }, [existingImages]);
 
