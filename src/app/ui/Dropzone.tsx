@@ -37,7 +37,7 @@ const DropzoneComponent = ({
    * สร้าง Dropzone
    */
   useEffect(() => {
-    
+
     if (!onFileUpload) return;
     if (!dropzoneRef.current) return;
     if (dzRef.current) return;
@@ -166,7 +166,7 @@ const DropzoneComponent = ({
 
       dzRef.current = null;
     };
-    
+
   }, []);
 
   // /**
@@ -183,14 +183,16 @@ const DropzoneComponent = ({
 
     existingImagesLoadedRef.current = true;
 
-    
+
 
     existingImages.forEach((image) => {
+   
       const mockFile = {
         name: image,
         size: 12345,
         accepted: true,
         serverFileName: image,
+        crossOrigin: "anonymous"
       };
 
       dzRef.current?.displayExistingFile(

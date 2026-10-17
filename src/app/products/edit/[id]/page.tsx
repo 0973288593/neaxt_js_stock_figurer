@@ -256,7 +256,7 @@ export default function EditProduct() {
                 }
               /> */}
 
-              <FileUpload
+              <FileUpload 
                 existingImages={formData.images}
                 onFileUpload={handleFileUpload}
               />
