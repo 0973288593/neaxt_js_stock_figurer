@@ -187,32 +187,25 @@ const DropzoneComponent = ({
   //  * ================================
   //  */
   const existingImagesLoadedRef = useRef(false);
+
   useEffect(() => {
-    if (!dzRef.current) return;
+    const dz = dzRef.current;
+
+    if (!dz) return;
     if (!Array.isArray(existingImages)) return;
     if (!existingImages.length) return;
     if (existingImagesLoadedRef.current) return;
 
     existingImagesLoadedRef.current = true;
 
-     const dz = dzRef.current;
-
-
-
     existingImages.forEach((image) => {
-
       const mockFile = {
         name: image,
         size: 12345,
         accepted: true,
         serverFileName: image,
-        crossOrigin: "anonymous"
       };
 
-      // dzRef.current?.displayExistingFile(
-      //   mockFile,
-      //   `${process.env.NEXT_PUBLIC_DOMAIN_IMAGE}product/${image}`
-      // );
       const imageUrl =
         `${process.env.NEXT_PUBLIC_DOMAIN_IMAGE}product/${image}`;
 
@@ -220,12 +213,9 @@ const DropzoneComponent = ({
         mockFile,
         imageUrl,
         undefined,
-        undefined,
+        "anonymous",
         false
       );
-
-
-
     });
   }, [existingImages]);
 
