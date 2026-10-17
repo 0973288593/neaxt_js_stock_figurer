@@ -46,6 +46,18 @@ const DropzoneComponent = ({
 
     console.log("Dropzone INIT");
 
+    Dropzone.options.myDropzone = {
+      init: function () {
+        this.on("thumbnail", function (file : any, dataUrl : any) {
+          console.log("สร้าง thumbnail แล้ว", file.name);
+        });
+
+        this.on("error", function (file :any, message :any) {
+          console.error("Upload error:", message);
+        });
+      }
+    };
+
     const dz = new Dropzone(dropzoneRef.current, {
       url: "/api/uploadProduct",
 
@@ -186,7 +198,7 @@ const DropzoneComponent = ({
 
 
     existingImages.forEach((image) => {
-   
+
       const mockFile = {
         name: image,
         size: 12345,
